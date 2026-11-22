@@ -94,6 +94,8 @@
       background: #CBD5E1;
       border-radius: 9999px;
     }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+    .shake { animation: shake 0.35s ease-in-out; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -105,8 +107,26 @@
 </head>
 <body class="min-h-screen sm:flex items-center justify-center sm:p-4 text-slate-800">
 
+
+  <!-- Écran de verrouillage -->
+  <div id="lock-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-forvia-navy via-forvia-blue to-[#003B64] text-white" style="padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) 1.5rem calc(env(safe-area-inset-bottom, 0px) + 1.5rem);">
+    <form id="lock-form" class="w-full max-w-sm text-center" autocomplete="off" onsubmit="return submitLock(event)">
+      <div class="mx-auto w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+        <svg class="w-8 h-8 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+      </div>
+      <h1 class="mt-4 text-lg font-extrabold tracking-tight">Guide Audit S/R</h1>
+      <p class="text-xs text-sky-200 mt-1">FORVIA Automotive Seating · accès protégé</p>
+      <div id="lock-field" class="mt-6">
+        <input id="lock-input" type="password" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Mot de passe"
+          class="w-full bg-white/10 border border-white/25 focus:border-sky-300 focus:ring-2 focus:ring-sky-400/30 rounded-2xl px-4 py-3.5 text-center text-white placeholder-slate-300 outline-none" />
+      </div>
+      <p id="lock-error" class="text-xs text-red-300 font-semibold mt-2 min-h-[1rem]"></p>
+      <button type="submit" class="touch-target mt-3 w-full py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 active:bg-sky-600 text-white text-sm font-bold transition shadow-lg">Déverrouiller</button>
+    </form>
+  </div>
+
   <!-- Mobile App Container -->
-  <div id="app-shell" class="w-full sm:w-[440px] h-[100dvh] sm:h-[860px] bg-forvia-light sm:rounded-[34px] sm:shadow-2xl sm:border-[6px] sm:border-slate-900 flex flex-col overflow-hidden relative">
+  <div id="app-shell" style="display:none" class="w-full sm:w-[440px] h-[100dvh] sm:h-[860px] bg-forvia-light sm:rounded-[34px] sm:shadow-2xl sm:border-[6px] sm:border-slate-900 flex flex-col overflow-hidden relative">
 
     <!-- Top App Header -->
     <header id="app-header" class="bg-gradient-to-r from-forvia-navy via-forvia-blue to-[#003B64] text-white px-4 pt-3 pb-3.5 shadow-md shrink-0 z-20">
@@ -125,10 +145,15 @@
             <h1 class="text-sm font-bold tracking-tight text-white mt-0.5 leading-tight">Guide Audit S/R — FORVIA</h1>
           </div>
         </div>
+        <div class="flex items-center gap-1.5">
+        <button onclick="lockApp()" title="Verrouiller" aria-label="Verrouiller" class="touch-target w-11 rounded-xl bg-white/10 active:bg-white/25 transition flex items-center justify-center border border-white/15">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        </button>
         <button onclick="toggleEnglishGlobal()" id="btn-lang-toggle" title="Afficher/Masquer l'anglais original" class="touch-target px-3 py-1.5 rounded-xl bg-white/10 active:bg-white/25 transition text-xs font-semibold flex items-center gap-1.5 border border-white/15">
           <span>EN</span>
           <span id="en-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
         </button>
+        </div>
       </div>
     </header>
 
@@ -1638,10 +1663,85 @@ window.addEventListener('popstate', function() {
   document.addEventListener(ev, function(e) { e.preventDefault(); });
 });
 
-window.onload = function() {
+// ============================================================================
+// VERROUILLAGE PAR MOT DE PASSE (empreinte uniquement, le mot de passe n'est pas stocké en clair)
+// ============================================================================
+const LOCK_SHA256 = "fd03f1b435aea479ae3dec7b46ee12d11c0b3271d2ff3bdc4bfe00149775a062";
+const LOCK_FALLBACK = "74ae376b5d82e";
+let lockFails = 0;
+let lockBusyUntil = 0;
+let appStarted = false;
+
+function cyrb53(str, seed = 0) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+
+async function checkPassword(pw) {
+  const salted = 'forvia-sr|' + pw;
+  try {
+    if (window.crypto && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salted));
+      const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return hex === LOCK_SHA256;
+    }
+  } catch (e) {}
+  return cyrb53(salted) === LOCK_FALLBACK;
+}
+
+function startApp() {
+  if (appStarted) return;
+  appStarted = true;
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = '';
   updateLangButtonUI();
   updateNavUI();
   renderCurrentView();
+}
+
+async function submitLock(e) {
+  e.preventDefault();
+  const input = document.getElementById('lock-input');
+  const err = document.getElementById('lock-error');
+  const now = Date.now();
+  if (now < lockBusyUntil) {
+    err.textContent = 'Patientez ' + Math.ceil((lockBusyUntil - now) / 1000) + ' s avant de réessayer.';
+    return false;
+  }
+  if (await checkPassword(input.value)) {
+    try { sessionStorage.setItem('forvia_sr_unlocked', '1'); } catch (x) {}
+    input.value = '';
+    startApp();
+  } else {
+    lockFails++;
+    if (lockFails >= 3) lockBusyUntil = Date.now() + Math.min(30, 3 * (lockFails - 2)) * 1000;
+    err.textContent = 'Mot de passe incorrect.';
+    input.value = '';
+    const f = document.getElementById('lock-field');
+    f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
+    if (navigator.vibrate) { try { navigator.vibrate([30, 40, 30]); } catch (x) {} }
+    input.focus();
+  }
+  return false;
+}
+
+function lockApp() {
+  try { sessionStorage.removeItem('forvia_sr_unlocked'); } catch (x) {}
+  location.reload();
+}
+
+window.onload = function() {
+  let unlocked = false;
+  try { unlocked = sessionStorage.getItem('forvia_sr_unlocked') === '1'; } catch (x) {}
+  if (unlocked) startApp();
+  else setTimeout(function() { const i = document.getElementById('lock-input'); if (i) i.focus(); }, 150);
 };
 </script>
 </body>
