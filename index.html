@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Guide Audit S/R — FORVIA Automotive Seating</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            forvia: {
+              navy: '#0F172A',
+              blue: '#002B49',
+              cyan: '#0284C7',
+              light: '#F8FAFC',
+              danger: '#DC2626',
+              success: '#16A34A',
+              warn: '#D97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #E2E8F0;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Custom scrollbar for mobile frame */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center sm:p-4 text-slate-800">
+
+  <!-- Mobile App Container -->
+  <div id="app-shell" class="w-full sm:w-[440px] h-[100dvh] sm:h-[860px] bg-forvia-light sm:rounded-[34px] sm:shadow-2xl sm:border-[6px] sm:border-slate-900 flex flex-col overflow-hidden relative">
+
+    <!-- Top App Header -->
+    <header class="bg-gradient-to-r from-forvia-navy via-forvia-blue to-[#003B64] text-white px-4 pt-3 pb-3.5 shadow-md shrink-0 z-20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">FST-F-LSE-3925</span>
+              <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Issue n°4</span>
+            </div>
+            <h1 class="text-sm font-bold tracking-tight text-white mt-0.5 leading-tight">Guide Audit S/R — FORVIA</h1>
+          </div>
+        </div>
+        <button onclick="toggleEnglishGlobal()" id="btn-lang-toggle" title="Afficher/Masquer l'anglais original" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-[11px] font-semibold flex items-center gap-1 border border-white/15">
+          <span>EN</span>
+          <span id="en-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Viewport -->
+    <main id="main-content" class="flex-1 overflow-y-auto custom-scroll pb-24">
+      <!-- Dynamic views injected here -->
+    </main>
+
+    <!-- Bottom Navigation Bar (4 Tabs) -->
+    <nav class="bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+      <button onclick="switchTab('home')" data-tab="home" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-forvia-cyan">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+        </svg>
+        <span class="text-[10px] font-semibold">Accueil</span>
+      </button>
+
+      <button onclick="switchTab('processes')" data-tab="processes" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
+        </svg>
+        <span class="text-[10px] font-semibold">Processus (22)</span>
+      </button>
+
+      <button onclick="switchTab('bp')" data-tab="bp" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500 relative">
+        <span class="absolute top-1 right-3 bg-forvia-danger text-white text-[9px] font-bold px-1.5 rounded-full leading-4">79</span>
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+        </svg>
+        <span class="text-[10px] font-semibold">Bloquants</span>
+      </button>
+
+      <button onclick="switchTab('simulator')" data-tab="simulator" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/>
+        </svg>
+        <span class="text-[10px] font-semibold">Audit & Glossaire</span>
+      </button>
+    </nav>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 whitespace-nowrap">
+      Notification
+    </div>
+  </div>
+
+<script>
+// ============================================================================
+// BASE DE DONNÉES COMPLÈTE : 22 PROCESSUS & 350 CRITÈRES D'AUDIT S/R (FORVIA)
+// Référence : FST-F-LSE-3925 — Issue n°4 (04/25)
+// ============================================================================
+
+const AUDIT_DATABASE = [
+  {
+    id: 1,
+    code: "P01",
+    name: "Questions Transversales",
+    enName: "Transversal Questions",
+    icon: "🌐",
+    description: "Exigences générales applicables à l'ensemble du site : gestion des modifications, dérogations, alertes S/R, formation des opérateurs, maintenance préventive, FMEA et réactions aux dérives.",
+    criteria: [
+      { id: "1.1", theme: "Gestion des changements (4M)", bp: false, fr: "Les modifications produit ou process (y compris la réimplantation d'équipements) sont-elles maîtrisées via un processus structuré garantissant la conformité continue aux exigences S/R ?", en: "Are product or process changes (including equipment relocation) controlled through a structured process ensuring ongoing compliance with S/R requirements?" },
+      { id: "1.2", theme: "Gestion des dérogations", bp: true, fr: "Toute dérogation affectant une caractéristique S/R est-elle formellement approuvée via le formulaire FAU-F-DSG-0002 avant expédition ou utilisation ?", en: "Is any deviation affecting an S/R characteristic formally approved via FAU-F-DSG-0002 prior to shipment or use?" },
+      { id: "1.3", theme: "20 Règles Obligatoires S/R", bp: false, fr: "Les 20 règles obligatoires Sécurité & Réglementation (FAU-C-DSG-3530) sont-elles connues, déployées et appliquées sur les lignes concernées ?", en: "Are the 20 mandatory Safety & Regulation rules (FAU-C-DSG-3530) known, deployed, and applied on relevant lines?" },
+      { id: "1.4", theme: "Alerte Situations Sensibles", bp: false, fr: "La procédure d'alerte sur situations sensibles (FAU-P-LSC-7000) est-elle appliquée immédiatement en cas d'incident ou de doute sur une pièce S/R ?", en: "Is the sensitive situation alert procedure (FAU-P-LSC-7000) immediately applied in case of an incident or doubt on an S/R part?" },
+      { id: "1.5", theme: "Identification des postes S/R", bp: false, fr: "Les postes de travail et opérations générant ou contrôlant des caractéristiques S/R (KPC/KCC) sont-ils clairement identifiés sur le terrain (pictogramme S/R) ?", en: "Are workstations and operations generating or controlling S/R characteristics (KPC/KCC) clearly identified on the shopfloor (S/R pictogram)?" },
+      { id: "1.6", theme: "Qualification & Habilitation opérateurs", bp: false, fr: "Les opérateurs et régleurs intervenant sur des postes S/R disposent-ils d'une habilitation valide, à jour et affichée au poste ?", en: "Do operators and setters working on S/R stations hold valid, up-to-date qualification displayed at the station?" },
+      { id: "1.7", theme: "Remplacement & Polyvalence", bp: false, fr: "En cas d'absence d'un opérateur titulaire sur un poste S/R, le remplaçant est-il formellement qualifié et enregistré dans la matrice de polyvalence ?", en: "In case of absence of a regular operator on an S/R station, is the replacement formally qualified and recorded in the skills matrix?" },
+      { id: "1.8", theme: "Instructions de travail standard", bp: false, fr: "Les instructions de travail au poste intègrent-elles explicitement les points de vigilance S/R, les contrôles requis et les règles de réaction ?", en: "Do workstation instructions explicitly integrate S/R vigilance points, required checks, and reaction rules?" },
+      { id: "1.9", theme: "Analyse AMDEC Process (PFMEA)", bp: false, fr: "L'AMDEC Process identifie-t-elle toutes les caractéristiques S/R avec une sévérité appropriée (9-10) et des actions de prévention/détection efficaces ?", en: "Does the PFMEA identify all S/R characteristics with appropriate severity (9-10) and effective prevention/detection actions?" },
+      { id: "1.10", theme: "Plan de Surveillance (Control Plan)", bp: false, fr: "Le Plan de Surveillance est-il cohérent avec l'AMDEC Process et appliqué strictement en production (fréquences, tailles d'échantillons, moyens) ?", en: "Is the Control Plan consistent with the PFMEA and strictly applied in production (frequencies, sample sizes, gages)?" },
+      { id: "1.11", theme: "Capitalisation Retour d'Expérience (LLS)", bp: false, fr: "Les fiches Lessons Learned (LLS) issues d'incidents S/R internes ou d'autres usines Forvia sont-elles intégrées dans les standards et vérifiées ?", en: "Are Lessons Learned Sheets (LLS) from internal S/R incidents or other Forvia plants integrated into standards and verified?" },
+      { id: "1.12", theme: "Validation Poka-Yoke & Détrompeurs", bp: false, fr: "Tous les dispositifs Poka-Yoke liés aux caractéristiques S/R sont-ils testés à chaque démarrage d'équipe à l'aide de pièces maîtres (rouges/témoins) ?", en: "Are all Poka-Yoke devices linked to S/R characteristics tested at every shift start using master (red/rabbit) parts?" },
+      { id: "1.13", theme: "Pièces maîtres (Red Rabbits)", bp: false, fr: "Les pièces maîtres servant à tester les Poka-Yoke sont-elles clairement identifiées, protégées, étalonnées et représentatives des défauts S/R ?", en: "Are master parts used to test Poka-Yoke clearly identified, protected, calibrated, and representative of S/R defects?" },
+      { id: "1.14", theme: "Mode dégradé / Bypass Poka-Yoke", bp: false, fr: "Existe-t-il une règle stricte interdisant le contournement (bypass) d'un Poka-Yoke sans autorisation écrite et contrôle 100% de substitution ?", en: "Is there a strict rule prohibiting bypassing a Poka-Yoke without written authorization and 100% substitute inspection?" },
+      { id: "1.15", theme: "Capabilité Process (Cpk / Ppk)", bp: false, fr: "Les caractéristiques KPC/KCC S/R font-elles l'objet d'un suivi SPC avec des indices de capabilité conformes aux exigences client et Forvia ?", en: "Are S/R KPC/KCC characteristics monitored via SPC with capability indices meeting customer and Forvia requirements?" },
+      { id: "1.16", theme: "Conservation des enregistrements S/R", bp: false, fr: "Les enregistrements liés aux caractéristiques S/R sont-ils archivés de manière sécurisée et récupérable conformément à la procédure FAU-P-LSC-5600 (durée légale) ?", en: "Are records related to S/R characteristics securely archived and retrievable per procedure FAU-P-LSC-5600 (legal retention period)?" },
+      { id: "1.17", theme: "Audits internes S/R", bp: false, fr: "Les audits internes S/R sont-ils planifiés et réalisés selon la procédure FAU-P-LSC-3900 avec suivi rigoureux des plans d'actions ?", en: "Are internal S/R audits planned and conducted per procedure FAU-P-LSC-3900 with rigorous action plan follow-up?" },
+      { id: "1.18", theme: "Gestion des fournisseurs S/R", bp: false, fr: "Les sous-traitants et fournisseurs livrant des composants S/R sont-ils audités et suivis sur leurs caractéristiques critiques ?", en: "Are subcontractors and suppliers delivering S/R components audited and monitored on their critical characteristics?" },
+      { id: "1.19", theme: "Résolution de problèmes 8D", bp: false, fr: "Tout écart sur une caractéristique S/R déclenche-t-il une analyse 8D approfondie avec vérification de l'efficacité des actions correctives ?", en: "Does any deviation on an S/R characteristic trigger a thorough 8D analysis with verification of corrective action effectiveness?" },
+      { id: "1.20", theme: "Validation redémarrage après arrêt", bp: false, fr: "Une procédure de validation (OK 1ère pièce) est-elle appliquée après tout arrêt prolongé, changement d'outil, panne ou maintenance ?", en: "Is a validation procedure (OK 1st part) applied after any extended stop, tool change, breakdown, or maintenance?" },
+      { id: "1.21", theme: "Étalonnage des moyens de contrôle", bp: false, fr: "Tous les moyens de mesure et d'essai utilisés pour valider des caractéristiques S/R sont-ils étalonnés, identifiés et dans leur période de validité ?", en: "Are all measurement and test equipment used to validate S/R characteristics calibrated, identified, and within validity period?" },
+      { id: "1.22", theme: "Règle d'escalade et arrêt de ligne", bp: false, fr: "Les opérateurs et superviseurs appliquent-ils la règle d'arrêt immédiat de ligne (« Stop at First Defect ») en cas de non-conformité S/R ?", en: "Do operators and supervisors apply the immediate line stop rule ('Stop at First Defect') in case of S/R non-conformity?" },
+      { id: "1.23", theme: "Clarté des spécifications client", bp: false, fr: "Les exigences spécifiques client (CSR) relatives à la sécurité et à la réglementation sont-elles traduites dans les documents internes d'atelier ?", en: "Are Customer Specific Requirements (CSR) related to safety and regulation translated into internal shopfloor documents?" },
+      { id: "1.24", theme: "Sécurité des données automates/IT", bp: false, fr: "Les programmes automates (PLC), recettes et sauvegardes des équipements S/R sont-ils protégés contre toute modification non autorisée ?", en: "Are PLC programs, recipes, and backups of S/R equipment protected against unauthorized modification?" },
+      { id: "1.25", theme: "Revue de direction S/R", bp: false, fr: "Les indicateurs de performance S/R, résultats d'audits et incidents sont-ils revus régulièrement par la direction du site ?", en: "Are S/R performance indicators, audit results, and incidents regularly reviewed by plant management?" }
+    ]
+  },
+  {
+    id: 2,
+    code: "P02",
+    name: "Laboratoire",
+    enName: "Laboratory",
+    icon: "🔬",
+    description: "Contrôle des essais destructifs et non destructifs en laboratoire : étalonnage, méthodes d'essai, habilitation des techniciens, traçabilité des éprouvettes et libération des lots.",
+    criteria: [
+      { id: "2.1", theme: "Habilitation techniciens labo", bp: false, fr: "Les techniciens réalisant les essais S/R (traction, coupe macrographique, dureté, brouillard salin) sont-ils formellement qualifiés et habilités ?", en: "Are technicians performing S/R tests (tensile, macro cut, hardness, salt spray) formally qualified and authorized?" },
+      { id: "2.2", theme: "Étalonnage équipements d'essai", bp: true, fr: "Tous les équipements d'essai du laboratoire (bancs de traction, duromètres, microscopes, balances) sont-ils étalonnés selon les normes ISO/IEC 17025 ou exigences client ?", en: "Are all laboratory test equipment (tensile benches, hardness testers, microscopes, scales) calibrated per ISO/IEC 17025 or customer requirements?" },
+      { id: "2.3", theme: "Conformité des méthodes d'essai", bp: false, fr: "Les modes opératoires d'essai respectent-ils strictement les normes spécifiées sur les plans (vitesse de traction, préparation d'éprouvettes, attaque chimique) ?", en: "Do test operating procedures strictly comply with standards specified on drawings (tensile speed, specimen preparation, chemical etching)?" },
+      { id: "2.4", theme: "Répétabilité & Reproductibilité (MSA/R&R)", bp: false, fr: "Des études MSA / R&R sont-elles réalisées pour les mesures critiques effectuées au laboratoire (ex: mesure de pénétration de soudure) ?", en: "Are MSA / R&R studies performed for critical measurements carried out in the laboratory (e.g., weld penetration measurement)?" },
+      { id: "2.5", theme: "Traçabilité des échantillons", bp: false, fr: "Chaque éprouvette testée est-elle identifiée de manière unique afin de garantir le lien indiscutable entre le résultat d'essai et le lot de production ?", en: "Is each tested specimen uniquely identified to ensure an indisputable link between test result and production batch?" },
+      { id: "2.6", theme: "Critères d'acceptation affichés", bp: false, fr: "Les critères d'acceptation (valeurs min/max, photos de référence OK/NOK) sont-ils clairement définis et accessibles aux techniciens ?", en: "Are acceptance criteria (min/max values, OK/NOK reference photos) clearly defined and accessible to technicians?" },
+      { id: "2.7", theme: "Règle d'alerte résultat NOK labo", bp: true, fr: "En cas de résultat d'essai laboratoire NOK sur une caractéristique S/R, le lot est-il immédiatement bloqué et la ligne de production arrêtée ?", en: "In case of an NOK laboratory test result on an S/R characteristic, is the batch immediately blocked and the production line stopped?" },
+      { id: "2.8", theme: "Libération des lots après essai", bp: true, fr: "Les lots soumis à essai destructif laboratoire sont-ils maintenus en quarantaine physique/informatique jusqu'à validation formelle du rapport d'essai ?", en: "Are batches subject to destructive lab testing kept in physical/IT quarantine until formal validation of the test report?" },
+      { id: "2.9", theme: "Archivage des rapports & macrographies", bp: false, fr: "Les rapports d'essais, courbes de traction et images macrographiques sont-ils archivés et facilement consultables pendant toute la durée réglementaire ?", en: "Are test reports, tensile curves, and macrographic images archived and easily retrievable throughout the regulatory retention period?" },
+      { id: "2.10", theme: "Conditions environnementales labo", bp: false, fr: "Les conditions ambiantes du laboratoire (température, hygrométrie, éclairage) sont-elles maîtrisées lorsque la norme d'essai l'exige ?", en: "Are ambient laboratory conditions (temperature, humidity, lighting) controlled when required by the test standard?" },
+      { id: "2.11", theme: "Vérification périodique interne", bp: false, fr: "Des vérifications intermédiaires (ex: cales étalons pour duromètre avant utilisation) sont-elles réalisées et enregistrées ?", en: "Are intermediate checks (e.g., standard blocks for hardness tester before use) performed and recorded?" }
+    ]
+  },
+  {
+    id: 3,
+    code: "P03",
+    name: "Maintenance",
+    enName: "Maintenance",
+    icon: "🔧",
+    description: "Maintenance préventive et curative des équipements S/R, gestion des pièces de rechange critiques, contrôle des paramètres après intervention et maîtrise des clés de sécurité.",
+    criteria: [
+      { id: "3.1", theme: "Plan de maintenance préventive S/R", bp: false, fr: "Les équipements générant des caractéristiques S/R disposent-ils d'un plan de maintenance préventive spécifique incluant les éléments critiques (capteurs, vérins, outillages) ?", en: "Do equipment generating S/R characteristics have a specific preventive maintenance plan including critical elements (sensors, cylinders, tooling)?" },
+      { id: "3.2", theme: "Respect du planning préventif", bp: false, fr: "Les opérations de maintenance préventive sur les lignes S/R sont-elles réalisées à la fréquence prévue et enregistrées dans la GMAO ?", en: "Are preventive maintenance operations on S/R lines performed at the scheduled frequency and recorded in the CMMS?" },
+      { id: "3.3", theme: "Maintenance autonome (TPM)", bp: false, fr: "Les tâches de maintenance de 1er niveau (nettoyage capteurs, vérification niveaux, serrage) sont-elles réalisées quotidiennement par les opérateurs ?", en: "Are 1st-level maintenance tasks (sensor cleaning, level checks, tightening) performed daily by operators?" },
+      { id: "3.4", theme: "Stock pièces de rechange critiques", bp: false, fr: "Les pièces de rechange critiques impactant la qualité S/R (capteurs force/déplacement, électrovannes, torches) sont-elles identifiées et maintenues en stock minimum ?", en: "Are critical spare parts impacting S/R quality (force/displacement sensors, solenoid valves, torches) identified and kept at minimum stock?" },
+      { id: "3.5", theme: "Conformité des pièces de rechange", bp: false, fr: "Toute substitution de pièce de rechange par une référence équivalente fait-elle l'objet d'une validation technique préalable ?", en: "Is any spare part substitution by an equivalent reference subject to prior technical validation?" },
+      { id: "3.6", theme: "Requalification après maintenance", bp: true, fr: "Après toute intervention de maintenance curative ou préventive sur un organe S/R, une requalification formelle (OK 1ère pièce / test Poka-Yoke) est-elle exigée avant reprise ?", en: "After any corrective or preventive maintenance intervention on an S/R component, is formal requalification (OK 1st part / Poka-Yoke test) required before restart?" },
+      { id: "3.7", theme: "Verrouillage des paramètres machine", bp: true, fr: "L'accès aux paramètres critiques machine et aux seuils de tolérance des capteurs est-il verrouillé (mot de passe, clé Euchner) et réservé au personnel habilité ?", en: "Is access to critical machine parameters and sensor tolerance thresholds locked (password, Euchner key) and restricted to authorized personnel?" },
+      { id: "3.8", theme: "Traçabilité des modifications paramètres", bp: false, fr: "Toute modification d'un paramètre machine S/R est-elle tracée (qui, quand, pourquoi, ancienne/nouvelle valeur) et validée ?", en: "Is any modification of an S/R machine parameter traced (who, when, why, old/new value) and validated?" },
+      { id: "3.9", theme: "Maintenance des outillages & moules", bp: false, fr: "Les outillages (matrices, poinçons, gabarits de soudage, mandrins) font-ils l'objet d'un suivi de compteur de cycles et d'une remise en état planifiée ?", en: "Are toolings (dies, punches, welding jigs, mandrels) tracked by cycle counters and subject to scheduled refurbishment?" },
+      { id: "3.10", theme: "Contrôle des gabarits de soudage/assemblage", bp: false, fr: "Les points d'appui, broches de centrage et brides des gabarits sont-ils contrôlés dimensionnellement périodiquement ?", en: "Are datum pads, locating pins, and clamps of jigs periodically dimensionally checked?" },
+      { id: "3.11", theme: "Gestion des sauvegardes automates", bp: false, fr: "Les sauvegardes (backups) à jour des programmes PLC, robots et contrôleurs de vissage/soudage sont-elles sécurisées et testées ?", en: "Are up-to-date backups of PLC, robot, and fastening/welding controller programs secured and tested?" },
+      { id: "3.12", theme: "Habilitation du personnel maintenance", bp: false, fr: "Les techniciens de maintenance intervenant sur les équipements spéciaux (laser, soudage, vissage asservi) ont-ils reçu une formation spécifique ?", en: "Have maintenance technicians working on special equipment (laser, welding, servo-fastening) received specific training?" },
+      { id: "3.13", theme: "Analyse des pannes récurrentes", bp: false, fr: "Les pannes répétitives affectant les équipements S/R font-elles l'objet d'une analyse de cause racine (5 Pourquoi) ?", en: "Are repetitive breakdowns affecting S/R equipment subject to root cause analysis (5 Whys)?" },
+      { id: "3.14", theme: "Gestion des énergies et fluides", bp: false, fr: "La qualité et la pression des fluides critiques (air comprimé, gaz de soudage, eau de refroidissement) sont-elles surveillées avec alarme en cas de dérive ?", en: "Are the quality and pressure of critical utilities (compressed air, shielding gas, cooling water) monitored with alarms on drift?" }
+    ]
+  },
+  {
+    id: 4,
+    code: "P04",
+    name: "Traçabilité",
+    enName: "Traceability",
+    icon: "🏷️",
+    description: "Traçabilité ascendante et descendante des composants S/R, matières premières, paramètres process et lots finis jusqu'à l'expédition client.",
+    criteria: [
+      { id: "4.1", theme: "Exigences de traçabilité définies", bp: false, fr: "Le niveau de traçabilité requis (unitaire par code DataMatrix ou par lot) est-il clairement défini pour chaque produit S/R selon les exigences client ?", en: "Is the required traceability level (unitary by DataMatrix code or by batch) clearly defined for each S/R product per customer requirements?" },
+      { id: "4.2", theme: "Traçabilité matière première & composants", bp: false, fr: "Les numéros de coulée/lot des matières premières (acier, fil, tube) et des sous-composants S/R sont-ils enregistrés et liés aux lots produits ?", en: "Are heat/batch numbers of raw materials (steel, wire, tube) and S/R sub-components recorded and linked to produced batches?" },
+      { id: "4.3", theme: "Unicité et lisibilité du marquage", bp: false, fr: "Le marquage de traçabilité (gravage laser, micro-percussion, étiquette) est-il permanent, lisible (grade A/B) et vérifié automatiquement par lecteur/caméra ?", en: "Is the traceability marking (laser engraving, dot peen, label) permanent, readable (grade A/B), and automatically verified by scanner/camera?" },
+      { id: "4.4", theme: "Prévention des doublons de code", bp: false, fr: "Le système informatique (MES) empêche-t-il automatiquement la génération ou le passage de deux pièces ayant le même numéro de série ?", en: "Does the IT system (MES) automatically prevent generating or processing two parts with the same serial number?" },
+      { id: "4.5", theme: "Lien paramètres process / pièce", bp: false, fr: "Les paramètres critiques de fabrication (couples de vissage, courbes de soudage, efforts de sertissage) sont-ils enregistrés et rattachés à chaque pièce ou lot ?", en: "Are critical manufacturing parameters (fastening torques, welding curves, crimping forces) recorded and linked to each part or batch?" },
+      { id: "4.6", theme: "Gestion des bacs et contenants (FIFO)", bp: false, fr: "Chaque contenant en cours de fabrication ou fini porte-t-il une étiquette d'identification claire garantissant le respect strict du FIFO ?", en: "Does every WIP or finished goods container bear a clear identification label ensuring strict FIFO compliance?" },
+      { id: "4.7", theme: "Interdiction de mélange de lots", bp: false, fr: "Les règles et dispositifs physiques empêchent-ils le mélange de pièces issues de lots différents, d'équipes différentes ou de statuts différents ?", en: "Do rules and physical devices prevent mixing parts from different batches, shifts, or statuses?" },
+      { id: "4.8", theme: "Enregistrement des opérations de reprise", bp: false, fr: "Toute pièce ayant subi une reprise autorisée est-elle tracée individuellement avec les résultats des contrôles après reprise ?", en: "Is any part having undergone authorized rework individually traced with post-rework inspection results?" },
+      { id: "4.9", theme: "Intégrité de la base de données", bp: false, fr: "Les données de traçabilité sont-elles sauvegardées automatiquement et protégées contre toute perte ou altération ?", en: "Is traceability data automatically backed up and protected against loss or tampering?" },
+      { id: "4.10", theme: "Test de traçabilité (Mock Recall)", bp: true, fr: "Un exercice de traçabilité ascendante et descendante est-il réalisé régulièrement et permet-il d'isoler 100% des pièces suspectes dans le délai imposé (< 4h) ?", en: "Is a forward and backward traceability exercise regularly performed and able to isolate 100% of suspect parts within the imposed timeframe (< 4h)?" },
+      { id: "4.11", theme: "Traçabilité expédition client", bp: false, fr: "Le lien entre les numéros de série/lots expédiés, les unités de manutention (GALIA/ODETTE) et les bons de livraison (ASN) est-il garanti à 100% ?", en: "Is the link between shipped serial/batch numbers, handling units (GALIA/ODETTE), and delivery notes (ASN) 100% guaranteed?" }
+    ]
+  },
+  {
+    id: 5,
+    code: "P05",
+    name: "Gestion des pièces NOK",
+    enName: "NOK Parts Management",
+    icon: "🚫",
+    description: "Identification, isolement, sécurisation (bacs rouges), analyse et destruction des pièces non conformes ou suspectes afin d'éviter tout retour accidentel dans le flux bon.",
+    criteria: [
+      { id: "5.1", theme: "Identification immédiate pièce NOK", bp: false, fr: "Toute pièce détectée non conforme ou suspecte est-elle immédiatement identifiée (marquage indélébile, étiquette rouge) dès sa détection ?", en: "Is any part detected as non-conforming or suspect immediately identified (indelible marking, red tag) upon detection?" },
+      { id: "5.2", theme: "Bacs rouges fermés et identifiés", bp: false, fr: "Des bacs rouges dédiés, fermés (couvercle verrouillé ou goulotte anti-retour) et clairement identifiés sont-ils disponibles à chaque poste ?", en: "Are dedicated red bins, closed (locked lid or one-way chute) and clearly identified, available at every workstation?" },
+      { id: "5.3", theme: "Sécurisation des pièces tombées au sol", bp: false, fr: "Toute pièce tombée au sol est-elle systématiquement considérée comme suspecte, isolée et soumise à un contrôle défini avant réintégration ou rebut ?", en: "Is any part dropped on the floor systematically considered suspect, isolated, and subjected to defined inspection before reintegration or scrap?" },
+      { id: "5.4", theme: "Gestion des pièces de réglage / démarrage", bp: false, fr: "Les pièces produites lors des réglages machine ou démarrages sont-elles clairement séparées et mises au rebut ou validées selon une règle stricte ?", en: "Are parts produced during machine setup or startup clearly separated and scrapped or validated according to a strict rule?" },
+      { id: "5.5", theme: "Maîtrise des pièces de contrôle destructif", bp: false, fr: "Les pièces prélevées pour contrôle destructif (labo, arrachement) sont-elles tracées et rendues inutilisables après essai ?", en: "Are parts sampled for destructive testing (lab, peel test) traced and rendered unusable after testing?" },
+      { id: "5.6", theme: "Zone de quarantaine verrouillée", bp: false, fr: "L'usine dispose-t-elle d'une zone de quarantaine fermée à clé (ou accès restreint) pour stocker les lots bloqués ou suspects ?", en: "Does the plant have a locked quarantine area (or restricted access) to store blocked or suspect batches?" },
+      { id: "5.7", theme: "Blocage informatique (ERP/MES)", bp: false, fr: "Tout lot mis en quarantaine physique est-il simultanément bloqué dans le système informatique afin d'empêcher toute expédition ?", en: "Is any batch placed in physical quarantine simultaneously blocked in the IT system to prevent shipment?" },
+      { id: "5.8", theme: "Règle d'endiguement (Containment)", bp: false, fr: "En cas de détection d'un défaut S/R, le périmètre suspect est-il immédiatement délimité jusqu'au dernier contrôle bon connu (en-cours, stock, transit) ?", en: "When an S/R defect is detected, is the suspect scope immediately contained back to the last known good check (WIP, stock, transit)?" },
+      { id: "5.9", theme: "Instructions de tri (Sorting)", bp: false, fr: "Toute opération de tri fait-elle l'objet d'une instruction écrite précise (défaut recherché, moyen de contrôle, identification des pièces triées) ?", en: "Is any sorting operation governed by a precise written instruction (defect sought, inspection method, identification of sorted parts)?" },
+      { id: "5.10", theme: "Vérification de l'efficacité du tri", bp: false, fr: "Les opérateurs de tri sont-ils formés et l'efficacité du tri est-elle vérifiée par un contrôle qualité indépendant (audit de tri) ?", en: "Are sorting operators trained and is sorting effectiveness verified by an independent quality check (sorting audit)?" },
+      { id: "5.11", theme: "Autorisation formelle de reprise", bp: true, fr: "Aucune reprise (rework) sur un produit S/R n'est-elle effectuée sans une gamme de reprise validée par l'ingénierie/qualité et approuvée par le client si requis ?", en: "Is no rework on an S/R product performed without a rework routing validated by engineering/quality and approved by the customer if required?" },
+      { id: "5.12", theme: "Interdiction de reprise non autorisée", bp: false, fr: "Les opérations de reprise interdites par les règles S/R (ex: ressoudage non validé, redressement à froid) sont-elles clairement listées et connues ?", en: "Are rework operations prohibited by S/R rules (e.g., unvalidated re-welding, cold straightening) clearly listed and known?" },
+      { id: "5.13", theme: "Contrôle 100% après reprise", bp: false, fr: "Toute pièce reprise repasse-t-elle par l'ensemble des contrôles et Poka-Yoke de la gamme standard ainsi que des contrôles spécifiques ?", en: "Does every reworked part go back through all checks and Poka-Yoke of the standard routing as well as specific checks?" },
+      { id: "5.14", theme: "Réintroduction dans le flux", bp: false, fr: "Le point de réintroduction d'une pièce reprise dans le flux de production est-il défini et maîtrisé pour ne sauter aucune étape de contrôle ?", en: "Is the reintroduction point of a reworked part into the production flow defined and controlled so no inspection step is skipped?" },
+      { id: "5.15", theme: "Vidange régulière des bacs rouges", bp: false, fr: "Les bacs rouges au poste sont-ils vidés et analysés à fréquence définie (fin d'équipe) avec enregistrement des quantités et types de défauts ?", en: "Are red bins at workstations emptied and analyzed at a defined frequency (end of shift) with recording of quantities and defect types?" },
+      { id: "5.16", theme: "Déclenchement d'alerte sur seuil NOK", bp: false, fr: "Un seuil d'alerte (ex: 2 défauts identiques consécutifs) déclenche-t-il l'arrêt immédiat du poste et l'appel du responsable ?", en: "Does an alert threshold (e.g., 2 consecutive identical defects) trigger immediate station stop and supervisor call?" },
+      { id: "5.17", theme: "Destruction physique des rebuts S/R", bp: true, fr: "Les pièces S/R rebutées sont-elles physiquement détruites ou rendues inutilisables (écrasement, découpe) avant évacuation vers le ferrailleur ?", en: "Are scrapped S/R parts physically destroyed or rendered unusable (crushed, cut) prior to disposal to the scrap dealer?" },
+      { id: "5.18", theme: "Sécurisation des bennes à rebuts", bp: false, fr: "Les bennes à rebuts contenant des composants S/R sont-elles sécurisées pour empêcher toute récupération non autorisée ?", en: "Are scrap bins containing S/R components secured to prevent any unauthorized retrieval?" },
+      { id: "5.19", theme: "Gestion des pièces témoins / échantillons", bp: false, fr: "Les pièces prélevées pour validation (ex: audit produit, client) sont-elles tracées si elles sont réintégrées en production ?", en: "Are parts sampled for validation (e.g., product audit, customer) traced if they are reintegrated into production?" },
+      { id: "5.20", theme: "Analyse des retours clients / démérites", bp: false, fr: "Tout défaut S/R détecté en aval (assemblage final, JIT, client) fait-il l'objet d'un blocage immédiat et d'une analyse 8D ?", en: "Is any S/R defect detected downstream (final assembly, JIT, customer) subject to immediate blocking and 8D analysis?" },
+      { id: "5.21", theme: "Clôture des actions de confinement", bp: false, fr: "La levée d'une quarantaine ou d'un mur qualité est-elle formellement signée par le responsable Qualité après vérification des critères de sortie ?", en: "Is the lifting of a quarantine or quality wall formally signed off by the Quality Manager after verifying exit criteria?" },
+      { id: "5.22", theme: "Formation au tri et à la détection", bp: false, fr: "Des défauts types (panoplie de défauts) sont-ils affichés au poste pour aider les opérateurs à reconnaître les non-conformités ?", en: "Are defect boundary samples displayed at the workstation to help operators recognize non-conformities?" },
+      { id: "5.23", theme: "Vérification des goulottes d'éjection", bp: false, fr: "Sur les machines automatisées, l'éjection des pièces NOK dans le bac rouge est-elle confirmée par un capteur de passage ?", en: "On automated machines, is the ejection of NOK parts into the red bin confirmed by a passage sensor?" },
+      { id: "5.24", theme: "Blocage machine si bac rouge plein", bp: false, fr: "La machine s'arrête-t-elle automatiquement si le bac rouge est plein, absent ou si la pièce NOK n'est pas tombée dans le bac ?", en: "Does the machine automatically stop if the red bin is full, missing, or if the NOK part did not fall into the bin?" },
+      { id: "5.25", theme: "Suivi des coûts et taux de rebut S/R", bp: false, fr: "Les taux de rebut et de reprise sur les lignes S/R sont-ils suivis quotidiennement pour détecter toute dérive process ?", en: "Are scrap and rework rates on S/R lines monitored daily to detect any process drift?" }
+    ]
+  },
+  {
+    id: 6,
+    code: "P06",
+    name: "Découpage fin & Emboutissage",
+    enName: "Fine Blanking & Stamping",
+    icon: "⚙️",
+    description: "Maîtrise des presses de découpage fin et d'emboutissage : matière première, lubrification, usure des poinçons/matrices, contrôle dimensionnel et état de tranche.",
+    criteria: [
+      { id: "6.1", theme: "Conformité matière première (CCPU)", bp: true, fr: "La conformité de chaque bobine/flan d'acier (nuance, épaisseur, caractéristiques mécaniques CCPU) est-elle vérifiée avant engagement sur presse ?", en: "Is the compliance of each steel coil/blank (grade, thickness, mechanical properties CCPU) verified before loading onto the press?" },
+      { id: "6.2", theme: "Identification et traçabilité bobine", bp: false, fr: "Chaque bobine engagée porte-t-elle une étiquette lisible permettant de relier le numéro de coulée aux lots de pièces découpées ?", en: "Does each loaded coil bear a readable label linking the heat number to the stamped part batches?" },
+      { id: "6.3", theme: "Contrôle épaisseur bande en continu", bp: false, fr: "L'épaisseur de la bande est-elle contrôlée (palpeur ou mesure au démarrage) avec arrêt automatique en cas de hors tolérance ?", en: "Is strip thickness checked (probe or startup measurement) with automatic stop if out of tolerance?" },
+      { id: "6.4", theme: "Maîtrise de la lubrification", bp: false, fr: "Le type, la viscosité et le débit d'huile d'emboutissage/découpage fin sont-ils conformes aux spécifications et surveillés ?", en: "Are the type, viscosity, and flow rate of stamping/fine blanking oil compliant with specifications and monitored?" },
+      { id: "6.5", theme: "Paramètres presse verrouillés", bp: true, fr: "Les paramètres critiques de presse (effort de serre-flan, contre-pression, vitesse, point mort bas) sont-ils verrouillés et surveillés ?", en: "Are critical press parameters (blank holder force, counter-pressure, speed, bottom dead center) locked and monitored?" },
+      { id: "6.6", theme: "Détection défauts dans l'outil", bp: false, fr: "L'outil est-il équipé de capteurs de détection d'avance, d'éjection pièce/déchet et de surépaisseur avec arrêt immédiat de la presse ?", en: "Is the tool equipped with feed, part/slug ejection, and double-blank detection sensors with immediate press stop?" },
+      { id: "6.7", theme: "OK 1ère pièce Produit (Dimensionnel & Aspect)", bp: true, fr: "Un contrôle OK 1ère pièce complet (cotes fonctionnelles, profils de denture, absence de criques/fissures, état de coupe) est-il réalisé au démarrage ?", en: "Is a complete OK 1st part check (functional dimensions, tooth profiles, absence of cracks, shear zone condition) performed at startup?" },
+      { id: "6.8", theme: "Contrôle état de tranche & bavures", bp: false, fr: "La hauteur de bavure et le pourcentage de zone cisaillée (découpage fin) sont-ils mesurés à fréquence définie selon le plan de surveillance ?", en: "Are burr height and clean-shear zone percentage (fine blanking) measured at defined frequency per the control plan?" },
+      { id: "6.9", theme: "Contrôle absence de criques / amorces de rupture", bp: false, fr: "Les zones fortement déformées (pliages, soyages, collerettes) font-elles l'objet d'un contrôle visuel ou ressuage pour détecter toute micro-fissure ?", en: "Are heavily deformed areas (bends, offsets, collars) visually or dye-penetrant inspected to detect any micro-cracks?" },
+      { id: "6.10", theme: "Maintenance & affûtage des outils", bp: false, fr: "L'affûtage des poinçons et matrices est-il réalisé selon un compteur de coups défini avec contrôle de la hauteur d'outil après affûtage ?", en: "Is sharpening of punches and dies performed per a defined stroke counter with tool height check after sharpening?" },
+      { id: "6.11", theme: "Séparation fin de bobine / soudure de raccord", bp: false, fr: "Les pièces issues des zones de raccordement de bobines ou d'arrêts presse sont-elles automatiquement éjectées ou isolées ?", en: "Are parts from coil splice zones or press stops automatically ejected or isolated?" },
+      { id: "6.12", theme: "Protection contre la corrosion et chocs", bp: false, fr: "Les conditions de stockage et de conditionnement protègent-elles les pièces découpées contre l'oxydation et les déformations ?", en: "Do storage and packaging conditions protect stamped parts against oxidation and deformation?" }
+    ]
+  },
+  {
+    id: 7,
+    code: "P07",
+    name: "Traitement Thermique",
+    enName: "Heat Treatment",
+    icon: "🔥",
+    description: "Maîtrise des fours de trempe, revenu, cémentation et carbonitruration : températures, atmosphères, temps de maintien, trempe et contrôle métallurgique.",
+    criteria: [
+      { id: "7.1", theme: "Conformité norme CQI-9", bp: false, fr: "Le process de traitement thermique est-il audité annuellement selon le référentiel AIAG CQI-9 avec clôture des écarts ?", en: "Is the heat treatment process audited annually per AIAG CQI-9 standard with closure of findings?" },
+      { id: "7.2", theme: "Étalonnage thermocouples & pyrométrie (TUS/SAT)", bp: true, fr: "Les thermocouples de régulation/enregistrement et les essais d'homogénéité de température (TUS) et précision système (SAT) sont-ils à jour ?", en: "Are control/recording thermocouples and Temperature Uniformity Surveys (TUS) & System Accuracy Tests (SAT) up to date?" },
+      { id: "7.3", theme: "Verrouillage des recettes thermiques", bp: true, fr: "Les recettes de traitement (températures de consigne, temps de cycle, potentiel carbone, débit gaz) sont-elles verrouillées et protégées ?", en: "Are treatment recipes (setpoint temperatures, cycle times, carbon potential, gas flow) locked and protected?" },
+      { id: "7.4", theme: "Enregistrement continu des cycles", bp: false, fr: "Les courbes de température, d'atmosphère et de durée sont-elles enregistrées en continu et rattachées à chaque lot traité ?", en: "Are temperature, atmosphere, and duration curves continuously recorded and linked to each processed batch?" },
+      { id: "7.5", theme: "Maîtrise du milieu de trempe", bp: false, fr: "La température, l'agitation et le pouvoir refroidissant du milieu de trempe (huile, polymère, gaz) sont-ils surveillés et analysés périodiquement ?", en: "Are temperature, agitation, and cooling power of the quenching medium (oil, polymer, gas) monitored and periodically analyzed?" },
+      { id: "7.6", theme: "Plan de chargement des paniers/tapis", bp: false, fr: "La densité et la disposition de chargement des pièces respectent-elles un schéma validé garantissant un chauffage et une trempe homogènes ?", en: "Do loading density and part arrangement follow a validated pattern ensuring uniform heating and quenching?" },
+      { id: "7.7", theme: "OK 1ère pièce & Contrôle métallurgique", bp: true, fr: "Des essais métallurgiques (dureté cœur/surface, profondeur de cémentation, structure micrographique) sont-ils validés sur chaque lot selon le plan de contrôle ?", en: "Are metallurgical tests (core/surface hardness, case depth, micrographic structure) validated on each batch per the control plan?" },
+      { id: "7.8", theme: "Délai maximal entre trempe et revenu", bp: false, fr: "Le délai maximal autorisé entre l'opération de trempe et le revenu est-il surveillé et garanti pour prévenir tout risque de tapure ?", en: "Is the maximum allowable delay between quenching and tempering monitored and guaranteed to prevent quench cracking?" },
+      { id: "7.9", theme: "Réaction automatique en cas d'alarme four", bp: true, fr: "Toute dérive de température, d'atmosphère ou d'arrêt de convoyeur déclenche-t-elle une alarme immédiate et l'isolement automatique du lot concerné ?", en: "Does any temperature, atmosphere, or conveyor stop drift trigger an immediate alarm and automatic isolation of the affected batch?" },
+      { id: "7.10", theme: "Nettoyage / dégraissage avant traitement", bp: false, fr: "Les pièces sont-elles dégraissées avant entrée au four afin d'éviter toute pollution d'atmosphère ou défaut de cémentation ?", en: "Are parts degreased prior to furnace entry to avoid any atmosphere contamination or carburizing defect?" },
+      { id: "7.11", theme: "Interdiction de mélange pièces traitées / non traitées", bp: false, fr: "Des détrompeurs physiques ou flux séparés empêchent-ils tout mélange entre pièces brutes et pièces traitées thermiquement ?", en: "Do physical poka-yokes or separated flows prevent any mixing between raw and heat-treated parts?" },
+      { id: "7.12", theme: "Maîtrise du grenaillage / sablage", bp: false, fr: "Si un grenaillage est réalisé après traitement, ses paramètres (intensité Almen, couverture) sont-ils maîtrisés et enregistrés ?", en: "If shot peening/blasting is performed after treatment, are its parameters (Almen intensity, coverage) controlled and recorded?" },
+      { id: "7.13", theme: "Traçabilité des lots de traitement thermique", bp: false, fr: "Chaque contenant en sortie de four est-il identifié avec le numéro de charge, la date, le four et le statut de libération laboratoire ?", en: "Is each container exiting the furnace identified with load number, date, furnace ID, and laboratory release status?" }
+    ]
+  },
+  {
+    id: 8,
+    code: "P08",
+    name: "Formage de coupelle (Cup Forming)",
+    enName: "Cup Forming - Linear Cupping",
+    icon: "⭕",
+    description: "Formage de coupelles et emboutissage linéaire : alignement des outillages, contrôle effort/déplacement, détection de fissures et géométrie des logements.",
+    criteria: [
+      { id: "8.1", theme: "Conformité composants entrants", bp: false, fr: "La géométrie et l'état de surface des ébauches/tubes entrants sont-ils conformes aux spécifications avant formage de coupelle ?", en: "Are the geometry and surface condition of incoming blanks/tubes compliant with specifications prior to cup forming?" },
+      { id: "8.2", theme: "Lubrification de formage maîtrisée", bp: false, fr: "L'application du lubrifiant de formage est-elle homogène, contrôlée et exempte de contamination ?", en: "Is the forming lubricant application uniform, controlled, and free from contamination?" },
+      { id: "8.3", theme: "Alignement et guidage des poinçons", bp: false, fr: "L'alignement et le guidage des poinçons et matrices de formage sont-ils vérifiés lors de chaque montage d'outillage ?", en: "Are alignment and guidance of forming punches and dies verified during every tool setup?" },
+      { id: "8.4", theme: "Surveillance courbe Effort / Déplacement", bp: true, fr: "Chaque cycle de formage est-il surveillé par une courbe effort/déplacement avec fenêtres de contrôle verrouillées ?", en: "Is each forming cycle monitored by a force/displacement curve with locked control windows?" },
+      { id: "8.5", theme: "Éjection automatique des pièces NOK", bp: true, fr: "En cas de courbe effort/déplacement hors fenêtre, la pièce est-elle automatiquement éjectée dans un bac rouge verrouillé ?", en: "In case of an out-of-window force/displacement curve, is the part automatically ejected into a locked red bin?" },
+      { id: "8.6", theme: "OK 1ère pièce Produit (Géométrie & Fond)", bp: true, fr: "Un contrôle OK 1ère pièce (diamètres intérieurs/extérieurs, profondeur, planéité, épaisseur de fond) est-il réalisé au démarrage ?", en: "Is an OK 1st part check (inner/outer diameters, depth, flatness, bottom thickness) performed at startup?" },
+      { id: "8.7", theme: "Contrôle absence de criques ou plis", bp: false, fr: "Les rayons et bords formés sont-ils contrôlés visuellement (et/ou macrographie) pour garantir l'absence de plis, déchirures ou amorces de fissure ?", en: "Are formed radii and edges visually (and/or macrographically) inspected to guarantee absence of wrinkles, tears, or crack initiations?" },
+      { id: "8.8", theme: "Contrôle de concentricité / coaxialité", bp: false, fr: "La concentricité et la perpendicularité de la coupelle par rapport à l'axe de référence sont-elles vérifiées selon le plan de surveillance ?", en: "Are concentricity and perpendicularity of the cup relative to the datum axis verified per the control plan?" },
+      { id: "8.9", theme: "Suivi d'usure des outillages de formage", bp: false, fr: "Les poinçons et matrices font-ils l'objet d'un suivi d'usure (compteur de cycles et contrôle dimensionnel) avant dérive géométrique ?", en: "Are punches and dies monitored for wear (cycle counter and dimensional check) prior to geometric drift?" },
+      { id: "8.10", theme: "Test Poka-Yoke capteurs force/course", bp: false, fr: "Le bon fonctionnement du système de surveillance effort/course est-il vérifié à chaque équipe avec une pièce maître défaut ?", en: "Is the proper functioning of the force/stroke monitoring system verified every shift with a master defect part?" },
+      { id: "8.11", theme: "État de surface interne de la coupelle", bp: false, fr: "L'absence de rayures profondes ou grippage sur les surfaces fonctionnelles internes est-elle contrôlée ?", en: "Is the absence of deep scratches or galling on internal functional surfaces checked?" },
+      { id: "8.12", theme: "Propreté des logements avant assemblage", bp: false, fr: "Les copeaux, bavures ou résidus de lubrifiant sont-ils éliminés avant transfert vers l'opération suivante ?", en: "Are chips, burrs, or lubricant residues eliminated before transfer to the next operation?" },
+      { id: "8.13", theme: "Traçabilité des lots formés", bp: false, fr: "Chaque lot de pièces formées est-il identifié avec la machine, l'outillage, l'équipe et le statut de validation ?", en: "Is each batch of formed parts identified with machine, tooling, shift, and validation status?" }
+    ]
+  },
+  {
+    id: 9,
+    code: "P09",
+    name: "Formage d'extrémité (End Forming)",
+    enName: "End Forming - Expanding",
+    icon: "🔩",
+    description: "Évasement, rétreint et expansion d'extrémités de tubes/axes : contrôle dimensionnel, effort d'expansion, absence de fissures et état des mors.",
+    criteria: [
+      { id: "9.1", theme: "Contrôle coupe et ébavurage tube entrant", bp: false, fr: "La longueur, la perpendicularité de coupe et l'absence de bavures des tubes entrants sont-elles garanties avant formage d'extrémité ?", en: "Are length, cut perpendicularity, and absence of burrs on incoming tubes guaranteed prior to end forming?" },
+      { id: "9.2", theme: "Positionnement de la soudure de tube", bp: false, fr: "Si le tube est soudé longitudinalement, le cordon de soudure est-il orienté de manière contrôlée pour éviter son éclatement lors de l'expansion ?", en: "If the tube is longitudinally welded, is the weld seam oriented in a controlled manner to prevent splitting during expansion?" },
+      { id: "9.3", theme: "État et propreté des mors de serrage", bp: false, fr: "Les mors de serrage sont-ils exempts d'usure ou d'encrassement afin d'éviter tout glissement du tube pendant le formage ?", en: "Are clamping jaws free from wear or fouling to prevent any tube slippage during forming?" },
+      { id: "9.4", theme: "Verrouillage des paramètres de formage", bp: true, fr: "Les paramètres critiques (course de vérin, pression hydraulique, vitesse d'expansion) sont-ils verrouillés et protégés contre toute modification ?", en: "Are critical parameters (cylinder stroke, hydraulic pressure, expansion speed) locked and protected against modification?" },
+      { id: "9.5", theme: "Surveillance Effort / Déplacement", bp: true, fr: "L'effort et la course d'expansion/rétreint sont-ils surveillés à 100% avec fenêtres d'acceptation verrouillées ?", en: "Are expansion/reduction force and stroke 100% monitored with locked acceptance windows?" },
+      { id: "9.6", theme: "Blocage/Éjection automatique sur défaut", bp: true, fr: "Toute pièce présentant une courbe effort/course hors tolérance est-elle immédiatement isolée ou bloque-t-elle le cycle machine ?", en: "Is any part exhibiting an out-of-tolerance force/stroke curve immediately isolated or does it block the machine cycle?" },
+      { id: "9.7", theme: "OK 1ère pièce Produit (Dimensions critiques)", bp: true, fr: "Les cotes critiques après formage (diamètre expansé, longueur utile, angle de cône, épaisseur de paroi) sont-elles validées au démarrage ?", en: "Are critical post-forming dimensions (expanded diameter, effective length, cone angle, wall thickness) validated at startup?" },
+      { id: "9.8", theme: "Contrôle absence de fissures / éclatement", bp: true, fr: "L'extrémité formée est-elle contrôlée à 100% (ou selon plan validé) pour garantir l'absence totale de fissures radiales ou axiales ?", en: "Is the formed end inspected 100% (or per validated plan) to guarantee complete absence of radial or axial cracks?" },
+      { id: "9.9", theme: "Lubrification des poinçons d'expansion", bp: false, fr: "Les poinçons et segments d'expansion sont-ils correctement lubrifiés et maintenus pour éviter le grippage ?", en: "Are expansion punches and segments properly lubricated and maintained to prevent galling?" },
+      { id: "9.10", theme: "Vérification des calibres Entre/N'entre pas", bp: false, fr: "Les calibres tampon et bague utilisés pour contrôler les extrémités formées sont-ils étalonnés et disponibles au poste ?", en: "Are plug and ring gages used to inspect formed ends calibrated and available at the workstation?" },
+      { id: "9.11", theme: "Interdiction de reprise sur extrémité fissurée", bp: false, fr: "Toute pièce présentant une amorce de fissure ou un défaut géométrique est-elle immédiatement rebutée sans tentative de reformage ?", en: "Is any part showing crack initiation or geometric defect immediately scrapped without any re-forming attempt?" },
+      { id: "9.12", theme: "Contrôle géométrique de l'ensemble formé", bp: false, fr: "La géométrie globale de la pièce (entraxe entre deux extrémités formées, vrillage) est-elle vérifiée sur gabarit de contrôle ?", en: "Is the overall part geometry (center distance between two formed ends, twist) checked on a checking fixture?" },
+      { id: "9.13", theme: "Test Poka-Yoke au démarrage d'équipe", bp: false, fr: "Les capteurs de présence pièce, de glissement et d'effort sont-ils testés au début de chaque équipe ?", en: "Are part presence, slippage, and force sensors tested at the start of every shift?" },
+      { id: "9.14", theme: "Traçabilité et conditionnement adapté", bp: false, fr: "Les bacs de stockage évitent-ils tout choc ou ovalisation des extrémités formées pendant la manutention ?", en: "Do storage bins prevent any impact or ovalization of formed ends during handling?" }
+    ]
+  },
+  {
+    id: 10,
+    code: "P10",
+    name: "Rivetage aveugle (Blind Riveting)",
+    enName: "Blind Riveting",
+    icon: "📌",
+    description: "Assemblage par rivets aveugles : conformité des rivets, surveillance de courbe effort/course d'extraction du clou, rétention du clou et contrôle de serrage.",
+    criteria: [
+      { id: "10.1", theme: "Conformité et stockage des rivets aveugles", bp: false, fr: "Les rivets aveugles (référence, matière, longueur de serrage) sont-ils conformes à la nomenclature et stockés sans risque de mélange ?", en: "Are blind rivets (part number, material, grip range) compliant with BOM and stored without risk of mixing?" },
+      { id: "10.2", theme: "Contrôle des trous d'assemblage", bp: false, fr: "Le diamètre, l'alignement et l'ébavurage des trous des pièces à assembler sont-ils conformes aux tolérances requises ?", en: "Are diameter, alignment, and deburring of holes in parts to be joined compliant with required tolerances?" },
+      { id: "10.3", theme: "État du nez de pose et mors de riveteuse", bp: false, fr: "Le nez de pose (embout) et les mors d'extraction du pistolet/broche sont-ils adaptés au rivet et nettoyés/remplacés selon plan ?", en: "Are the nosepiece and pulling jaws of the rivet gun/spindle suited to the rivet and cleaned/replaced per schedule?" },
+      { id: "10.4", theme: "Surveillance Effort / Course de sertissage", bp: true, fr: "Chaque cycle de rivetage aveugle est-il contrôlé par analyse de courbe effort/course (détection rupture clou et serrage) ?", en: "Is each blind riveting cycle controlled by force/stroke curve analysis (mandrel break and clamping detection)?" },
+      { id: "10.5", theme: "Blocage cycle sur rivetage NOK", bp: true, fr: "En cas de courbe hors tolérance (rivet absent, clou cassé trop tôt/tard, épaisseur incorrecte), le cycle est-il bloqué avec alarme ?", en: "In case of an out-of-tolerance curve (missing rivet, premature/late mandrel break, wrong thickness), is the cycle blocked with alarm?" },
+      { id: "10.6", theme: "Système d'aspiration des clous (mandrins)", bp: false, fr: "Les tiges de rivets cassées (mandrins) sont-elles aspirées et récupérées automatiquement sans risque de tomber dans le mécanisme/siège ?", en: "Are broken rivet stems (mandrels) automatically vacuumed and collected without risk of falling into the mechanism/seat?" },
+      { id: "10.7", theme: "OK 1ère pièce Produit (Aspect & Rétention)", bp: false, fr: "Un contrôle OK 1ère pièce (plaquage tête de rivet, formation bulbe arrière, rétention de la tête de clou, absence de jeu) est-il réalisé ?", en: "Is an OK 1st part check (rivet head seating, blind side bulb formation, mandrel head retention, no play) performed?" },
+      { id: "10.8", theme: "Essai destructif d'arrachement / cisaillement", bp: false, fr: "Des essais destructifs (résistance à l'arrachement et au cisaillement) sont-ils réalisés selon la fréquence du plan de surveillance ?", en: "Are destructive tests (tensile pull-out and shear strength) performed per the control plan frequency?" },
+      { id: "10.9", theme: "Perpendicularité de pose du rivet", bp: false, fr: "L'équipement garantit-il le maintien perpendiculaire du pistolet par rapport à la surface d'appui pendant toute la pose ?", en: "Does the equipment ensure perpendicular holding of the tool relative to the bearing surface throughout installation?" },
+      { id: "10.10", theme: "Règle de reprise / extraction rivet NOK", bp: false, fr: "En cas de rivet non conforme, la procédure de perçage/extraction est-elle validée pour ne pas ovaliser ou endommager le trou d'origine ?", en: "In case of a non-conforming rivet, is the drilling/removal procedure validated so as not to ovalize or damage the original hole?" },
+      { id: "10.11", theme: "Test Poka-Yoke (rivet absent / mauvaise longueur)", bp: false, fr: "Le système de surveillance est-il testé au démarrage d'équipe avec un essai simulé de défaut (ex: trou vide ou épaisseur modifiée) ?", en: "Is the monitoring system tested at shift startup with a simulated defect test (e.g., empty hole or altered thickness)?" },
+      { id: "10.12", theme: "Comptage automatique du nombre de rivets", bp: false, fr: "Pour les sous-ensembles comportant plusieurs rivets, l'automate vérifie-t-il que 100% des rivets ont été posés et validés avant libération ?", en: "For sub-assemblies with multiple rivets, does the PLC verify that 100% of rivets have been installed and validated before release?" }
+    ]
+  },
+  {
+    id: 11,
+    code: "P11",
+    name: "Rivetage (Riveting)",
+    enName: "Riveting (Orbital / Radial / Impact)",
+    icon: "🔨",
+    description: "Rivetage orbital, radial ou par écrasement d'axes/rivets pleins : géométrie de bouterolle, effort et course de rivetage, couple de rotation et essai d'arrachement.",
+    criteria: [
+      { id: "11.1", theme: "Conformité des axes/rivets entrants", bp: false, fr: "Les dimensions, la dureté et le traitement de surface des axes/rivets entrants sont-ils conformes aux spécifications ?", en: "Are dimensions, hardness, and surface treatment of incoming pins/rivets compliant with specifications?" },
+      { id: "11.2", theme: "État et géométrie de la bouterolle (outil)", bp: false, fr: "La bouterolle de rivetage est-elle conforme au plan (profil, état de surface), sans fissuration ni usure excessive ?", en: "Is the riveting peen/tool compliant with the drawing (profile, surface finish), free from cracking or excessive wear?" },
+      { id: "11.3", theme: "Verrouillage des paramètres de rivetage", bp: true, fr: "Les paramètres critiques (effort de rivetage, course finale, temps de maintien, vitesse de rotation) sont-ils verrouillés ?", en: "Are critical parameters (riveting force, final stroke, dwell time, rotational speed) locked?" },
+      { id: "11.4", theme: "Surveillance courbe Effort / Déplacement", bp: true, fr: "Chaque opération de rivetage S/R est-elle contrôlée en temps réel par une courbe effort/déplacement avec seuils min/max ?", en: "Is every S/R riveting operation monitored in real time by a force/displacement curve with min/max thresholds?" },
+      { id: "11.5", theme: "Éjection ou blocage automatique si NOK", bp: true, fr: "Tout rivetage dont la courbe effort/course sort des tolérances entraîne-t-il l'éjection automatique ou le blocage de la pièce ?", en: "Does any riveting whose force/stroke curve falls outside tolerances result in automatic ejection or blocking of the part?" },
+      { id: "11.6", theme: "OK 1ère pièce Produit (Diamètre & Hauteur tête)", bp: true, fr: "Les dimensions de la tête rivetée (diamètre, hauteur, concentricité) et l'absence de criques sont-elles contrôlées au démarrage ?", en: "Are riveted head dimensions (diameter, height, concentricity) and absence of cracks checked at startup?" },
+      { id: "11.7", theme: "Contrôle du jeu axial / couple de rotation", bp: false, fr: "Pour les articulations rivetées, le jeu fonctionnel ou le couple de friction après rivetage est-il mesuré selon le plan de surveillance ?", en: "For riveted joints, is functional play or friction torque after riveting measured per the control plan?" },
+      { id: "11.8", theme: "Essai destructif d'arrachement (Push-out)", bp: false, fr: "Des essais destructifs d'arrachement de la tête rivetée sont-ils réalisés et enregistrés selon la fréquence définie ?", en: "Are destructive push-out tests of the riveted head performed and recorded per the defined frequency?" },
+      { id: "11.9", theme: "Contrôle macrographique de la déformation", bp: false, fr: "Une coupe macrographique est-elle réalisée périodiquement (ou au démarrage) pour vérifier le remplissage et l'absence de criques internes ?", en: "Is a macrographic cross-section performed periodically (or at startup) to verify fill and absence of internal cracks?" },
+      { id: "11.10", theme: "Détection présence et orientation composants", bp: false, fr: "Les capteurs du posage vérifient-ils la présence et la bonne orientation de toutes les rondelles/flasques avant déclenchement du rivetage ?", en: "Do fixture sensors verify the presence and correct orientation of all washers/plates before triggering riveting?" },
+      { id: "11.11", theme: "Interdiction de double rivetage (re-frappe)", bp: false, fr: "L'automate empêche-t-il de riveter deux fois la même pièce ou de relancer un cycle après un arrêt d'urgence ?", en: "Does the PLC prevent riveting the same part twice or restarting a cycle after an emergency stop?" },
+      { id: "11.12", theme: "Test Poka-Yoke effort/course au démarrage", bp: false, fr: "La détection de défaut (ex: pièce sans rondelle ou axe trop court) est-elle testée à chaque début d'équipe ?", en: "Is defect detection (e.g., part missing washer or short pin) tested at the start of every shift?" },
+      { id: "11.13", theme: "Maintenance préventive tête de rivetage", bp: false, fr: "La lubrification interne de la tête orbitale/radiale et le contrôle des roulements sont-ils réalisés selon le planning préventif ?", en: "Are internal lubrication of the orbital/radial head and bearing checks performed per the preventive schedule?" },
+      { id: "11.14", theme: "Identification et traçabilité des lots", bp: false, fr: "Les lots rivetés sont-ils identifiés avec traçabilité des résultats de contrôle destructif et OK 1ère pièce ?", en: "Are riveted batches identified with traceability of destructive test and OK 1st part results?" }
+    ]
+  },
+  {
+    id: 12,
+    code: "P12",
+    name: "LockBolt",
+    enName: "LockBolt Fastening",
+    icon: "🔒",
+    description: "Assemblage par LockBolt (boulon à sertir) : contrôle des broches et bagues, surveillance courbe force/course, rupture de queue, jeu et essai d'arrachement.",
+    criteria: [
+      { id: "12.1", theme: "Conformité broches et bagues LockBolt", bp: false, fr: "Les broches (pins) et bagues (collars) LockBolt sont-elles conformes aux références plan et exemptes d'oxydation ou choc sur les gorges ?", en: "Are LockBolt pins and collars compliant with drawing part numbers and free from oxidation or damage on grooves?" },
+      { id: "12.2", theme: "Séparation stricte des références LockBolt", bp: false, fr: "Les bacs de broches et bagues au poste sont-ils cloisonnés et identifiés pour éviter tout mélange de longueurs ou nuances ?", en: "Are pin and collar bins at the workstation partitioned and identified to prevent any mixing of lengths or grades?" },
+      { id: "12.3", theme: "Contrôle des trous et épaisseur d'assemblage", bp: false, fr: "Le diamètre des trous et l'épaisseur totale empilée (grip) sont-ils conformes à la plage d'utilisation du LockBolt ?", en: "Are hole diameters and total stacked thickness (grip) compliant with the LockBolt operating range?" },
+      { id: "12.4", theme: "État et entretien du nez de pose (Anvil)", bp: false, fr: "L'enclume (anvil) et les mors du pistolet LockBolt sont-ils contrôlés régulièrement (usure, propreté) et remplacés selon compteur ?", en: "Are the anvil and jaws of the LockBolt tool regularly inspected (wear, cleanliness) and replaced per cycle counter?" },
+      { id: "12.5", theme: "Vérification pression hydraulique / pneumatique", bp: false, fr: "La pression d'alimentation du groupe hydraulique/pneumatique est-elle régulée et surveillée avec alarme en cas de chute ?", en: "Is the supply pressure of the hydraulic/pneumatic power unit regulated and monitored with alarm on drop?" },
+      { id: "12.6", theme: "Surveillance courbe Force / Déplacement", bp: true, fr: "Chaque pose de LockBolt est-elle surveillée par un système d'analyse de courbe force/course (sertissage bague + rupture queue) ?", en: "Is every LockBolt installation monitored by a force/stroke curve analysis system (collar swaging + pintail break)?" },
+      { id: "12.7", theme: "Verrouillage des fenêtres de contrôle", bp: true, fr: "Les fenêtres d'acceptation de la courbe force/course sont-elles verrouillées par mot de passe ou clé ?", en: "Are the force/stroke curve acceptance windows locked by password or key?" },
+      { id: "12.8", theme: "Blocage/Éjection immédiate si cycle NOK", bp: true, fr: "Toute anomalie de courbe (bague manquante, mauvaise épaisseur, queue non rompue) bloque-t-elle le cycle et isole-t-elle la pièce ?", en: "Does any curve anomaly (missing collar, wrong thickness, unbroken pintail) block the cycle and isolate the part?" },
+      { id: "12.9", theme: "OK 1ère pièce Produit (Sertissage & Queue)", bp: true, fr: "Un contrôle OK 1ère pièce (diamètre et longueur de bague sertie, affleurement de la rupture de queue, plaquage des pièces) est-il réalisé ?", en: "Is an OK 1st part check (swaged collar diameter and length, pintail break flushness, part seating) performed?" },
+      { id: "12.10", theme: "Contrôle avec calibre de bague sertie", bp: false, fr: "Un calibre Go/No-Go spécifique est-il utilisé au poste pour vérifier le diamètre et la longueur de la bague après sertissage ?", en: "Is a specific Go/No-Go gage used at the station to verify collar diameter and length after swaging?" },
+      { id: "12.11", theme: "Aspiration et récupération des queues rompues", bp: false, fr: "Les queues de broches rompues (pintails) sont-elles récupérées de façon étanche sans risque de chute dans le produit ?", en: "Are broken pintails collected in a sealed manner without risk of falling into the product?" },
+      { id: "12.12", theme: "Essai destructif de traction / cisaillement", bp: false, fr: "Des essais destructifs d'arrachement de la bague sertie sont-ils réalisés et enregistrés selon la fréquence du plan de surveillance ?", en: "Are destructive pull-off tests of the swaged collar performed and recorded per the control plan frequency?" },
+      { id: "12.13", theme: "Maintien perpendiculaire de l'outil de pose", bp: false, fr: "Un bras de réaction ou guide mécanique garantit-il la perpendicularité de l'outil lors du sertissage ?", en: "Does a reaction arm or mechanical guide ensure tool perpendicularity during swaging?" },
+      { id: "12.14", theme: "Séquence de pose multi-LockBolt", bp: false, fr: "L'ordre de pose et le nombre total de LockBolt par pièce sont-ils contrôlés automatiquement par l'automate ?", en: "Are installation sequence and total number of LockBolts per part automatically controlled by the PLC?" },
+      { id: "12.15", theme: "Interdiction de double sertissage", bp: false, fr: "Le système détecte-t-il et bloque-t-il toute tentative de re-sertissage sur un LockBolt déjà posé ?", en: "Does the system detect and block any attempt to re-swage an already installed LockBolt?" },
+      { id: "12.16", theme: "Procédure de retrait d'un LockBolt NOK", bp: false, fr: "En cas de défaut, le retrait de la bague (meulage/coupe contrôlée) est-il encadré par une instruction validée protégeant la structure ?", en: "In case of defect, is collar removal (controlled grinding/cutting) governed by a validated instruction protecting the structure?" },
+      { id: "12.17", theme: "Test Poka-Yoke au démarrage d'équipe", bp: false, fr: "Le système de détection (ex: essai sans bague ou avec rondelle d'épaisseur défaut) est-il testé à chaque équipe ?", en: "Is the detection system (e.g., test without collar or with defect thickness shim) tested every shift?" },
+      { id: "12.18", theme: "Traçabilité des courbes et des lots", bp: false, fr: "Les résultats de pose LockBolt sont-ils archivés et reliés au numéro de série ou lot de la pièce ?", en: "Are LockBolt installation results archived and linked to the part serial number or batch?" }
+    ]
+  },
+  {
+    id: 13,
+    code: "P13",
+    name: "Vissage (Fastening)",
+    enName: "Fastening (Torque & Angle Control)",
+    icon: "🪛",
+    description: "Vissage de sécurité asservi (couple/angle) : visseuses électroniques, stratégies de vissage, contrôle angle, étalonnage, gestion des reprises et prévention des vissages doubles.",
+    criteria: [
+      { id: "13.1", theme: "Conformité et séparation des vis/écrous", bp: false, fr: "Les éléments de fixation S/R (classe de qualité, revêtement, frein filet) sont-ils conformes et protégés contre tout mélange ?", en: "Are S/R fasteners (property class, coating, threadlocker) compliant and protected against mixing?" },
+      { id: "13.2", theme: "Capabilité et classe des visseuses (VDI/VDE 2647)", bp: false, fr: "Les visseuses utilisées pour les assemblages S/R sont-elles de type asservi électronique (contrôle couple + angle) avec capabilité Cmk ≥ 1,67 ?", en: "Are nutrunners used for S/R joints electronic servo-controlled (torque + angle control) with capability Cmk ≥ 1.67?" },
+      { id: "13.3", theme: "Verrouillage des programmes de vissage", bp: true, fr: "Les programmes des contrôleurs de vissage (couple cible, fenêtres couple/angle, vitesse) sont-ils verrouillés et protégés par mot de passe ?", en: "Are fastening controller programs (target torque, torque/angle windows, speed) locked and password-protected?" },
+      { id: "13.4", theme: "Surveillance Couple ET Angle à 100%", bp: true, fr: "Chaque vissage S/R est-il contrôlé à 100% simultanément sur le couple ET l'angle de serrage (pour détecter grippage, vis courte ou absence de rondelle) ?", en: "Is every S/R fastening 100% monitored simultaneously on both torque AND tightening angle (to detect galling, short screw, or missing washer)?" },
+      { id: "13.5", theme: "Blocage ligne / poste si vissage NOK", bp: true, fr: "Tout résultat de vissage NOK (couple ou angle hors fenêtre) bloque-t-il immédiatement l'avancement de la pièce ou du palette ?", en: "Does any NOK fastening result (torque or angle out of window) immediately block the advance of the part or pallet?" },
+      { id: "13.6", theme: "Prévention du double vissage (Re-hit)", bp: true, fr: "La stratégie de vissage (angle minimum requis, contrôle de pente) empêche-t-elle de valider un second coup de visseuse sur une vis déjà serrée ?", en: "Does the fastening strategy (minimum required angle, gradient monitoring) prevent validating a second hit on an already tightened screw?" },
+      { id: "13.7", theme: "Détection de vissage de travers (Cross-threading)", bp: false, fr: "La stratégie intègre-t-elle un seuil de couple maximal pendant la phase d'approche pour détecter tout vissage de travers ?", en: "Does the strategy integrate a maximum torque threshold during the rundown phase to detect any cross-threading?" },
+      { id: "13.8", theme: "Étalonnage périodique des visseuses", bp: false, fr: "Toutes les visseuses S/R et clés dynamométriques de contrôle sont-elles étalonnées périodiquement sur banc d'essai ?", en: "Are all S/R nutrunners and inspection torque wrenches periodically calibrated on a test bench?" },
+      { id: "13.9", theme: "Vérification quotidienne sur simulateur de joint", bp: false, fr: "Les visseuses font-elles l'objet d'une vérification journalière sur simulateur de joint avant démarrage de la production ?", en: "Are nutrunners subjected to a daily check on a joint simulator prior to production startup?" },
+      { id: "13.10", theme: "OK 1ère pièce Produit (Couple résiduel / Desserrage)", bp: false, fr: "Un contrôle OK 1ère pièce (vérification visuelle plaquage, contrôle de couple selon méthode validée) est-il réalisé au démarrage ?", en: "Is an OK 1st part check (visual seating check, torque check per validated method) performed at startup?" },
+      { id: "13.11", theme: "Contrôle de positionnement (Bras articulé / Vision)", bp: false, fr: "Pour les assemblages multi-vis, le système garantit-il (bras positionneur, douille sélective, vision) que chaque vis est serrée au bon endroit et dans l'ordre ?", en: "For multi-screw assemblies, does the system guarantee (positioning arm, socket tray, vision) that each screw is tightened in the right location and sequence?" },
+      { id: "13.12", theme: "Maîtrise des rallonges et douilles", bp: false, fr: "Les douilles et rallonges utilisées correspondent-elles exactement au programme défini (aucun changement non autorisé modifiant l'inertie) ?", en: "Do sockets and extensions used match the defined program exactly (no unauthorized changes altering inertia)?" },
+      { id: "13.13", theme: "Règle stricte de reprise après vissage NOK", bp: true, fr: "En cas de vissage NOK, le desserrage complet et le resserrage sont-ils encadrés par une règle stricte (nombre max de tentatives, changement de vis si frein filet) ?", en: "In case of NOK fastening, are full loosening and re-tightening governed by a strict rule (max number of attempts, screw replacement if threadlocker)?" },
+      { id: "13.14", theme: "Verrouillage du desserrage (Clé Euchner / Superviseur)", bp: false, fr: "Le mode desserrage (reverse) de la visseuse est-il bloqué par défaut et déverrouillable uniquement par une personne habilitée ?", en: "Is the nutrunner reverse mode locked by default and unlockable only by an authorized person?" },
+      { id: "13.15", theme: "État des taraudages et écrous soudés", bp: false, fr: "Les taraudages et écrous à souder sont-ils protégés contre les projections de soudure ou peinture avant vissage ?", en: "Are tapped holes and weld nuts protected against weld spatter or paint prior to fastening?" },
+      { id: "13.16", theme: "Bras de réaction et ergonomie opérateur", bp: false, fr: "Des bras de réaction sont-ils installés pour absorber le couple et garantir la perpendicularité de la douille sur la tête de vis ?", en: "Are reaction arms installed to absorb torque and ensure perpendicularity of the socket on the screw head?" },
+      { id: "13.17", theme: "Marquage visuel post-vissage (si requis)", bp: false, fr: "Si un marquage peinture (witness mark) est exigé par le client, est-il appliqué uniquement après validation verte du contrôleur ?", en: "If a paint witness mark is required by the customer, is it applied only after green validation from the controller?" },
+      { id: "13.18", theme: "Test Poka-Yoke vissage au démarrage", bp: false, fr: "Les sécurités de vissage (ex: simulation vis déjà serrée ou manque rondelle) sont-elles testées au démarrage d'équipe ?", en: "Are fastening safeguards (e.g., simulating already tightened screw or missing washer) tested at shift startup?" },
+      { id: "13.19", theme: "Maintenance préventive renvois d'angle/broches", bp: false, fr: "Les renvois d'angle, embrayages et câbles des visseuses font-ils l'objet d'une maintenance préventive planifiée ?", en: "Are angle heads, clutches, and nutrunner cables subject to scheduled preventive maintenance?" },
+      { id: "13.20", theme: "Enregistrement et traçabilité couple/angle", bp: false, fr: "Les valeurs exactes de couple et d'angle de chaque vis S/R sont-elles enregistrées et liées au numéro de série du produit ?", en: "Are exact torque and angle values of each S/R screw recorded and linked to the product serial number?" }
+    ]
+  },
+  {
+    id: 14,
+    code: "P14",
+    name: "Ligne JIT (Just-In-Time)",
+    enName: "JIT Line (Final Seat Assembly)",
+    icon: "🚗",
+    description: "Assemblage final des sièges en flux synchrone (JIT) : vérification des composants de sécurité (airbags, prétensionneurs, capteurs SBR), EOL et traçabilité VIN.",
+    criteria: [
+      { id: "14.1", theme: "Poka-Yoke sélection composants S/R (Pick-to-Light / Scan)", bp: true, fr: "La sélection et l'assemblage des composants critiques de sécurité (modules airbag, boucles de ceinture, prétensionneurs, armatures) sont-ils sécurisés par scan code-barres ou Pick-to-Light ?", en: "Are selection and assembly of critical safety components (airbag modules, belt buckles, pretensioners, frames) secured by barcode scan or Pick-to-Light?" },
+      { id: "14.2", theme: "Vérification conformité séquence client (VIN)", bp: true, fr: "Le système MES vérifie-t-il automatiquement la correspondance à 100% entre la référence des composants S/R montés et la commande véhicule client (VIN) ?", en: "Does the MES automatically verify 100% match between installed S/R component part numbers and the customer vehicle order (VIN)?" },
+      { id: "14.3", theme: "Test électrique fin de ligne (EOL)", bp: true, fr: "Chaque siège passe-t-il un test électrique EOL validant l'impédance airbag, le capteur d'occupation (SBR), les moteurs et la continuité avant expédition ?", en: "Does every seat pass an EOL electrical test validating airbag impedance, occupant sensor (SBR), motors, and continuity prior to shipment?" },
+      { id: "14.4", theme: "Blocage physique et informatique si EOL NOK", bp: true, fr: "En cas d'échec au test EOL ou d'étape manquante sur la ligne JIT, le siège est-il automatiquement bloqué (impossibilité d'imprimer l'étiquette d'expédition) ?", en: "In case of EOL test failure or missing step on the JIT line, is the seat automatically blocked (impossible to print shipping label)?" },
+      { id: "14.5", theme: "Protection des faisceaux et connecteurs airbag", bp: false, fr: "Le cheminement des faisceaux électriques et le verrouillage complet (CPA) des connecteurs airbag sont-ils contrôlés pour éviter tout pincement ou déconnexion ?", en: "Are wire harness routing and full locking (CPA) of airbag connectors inspected to prevent any pinching or disconnection?" }
+    ]
+  },
+  {
+    id: 15,
+    code: "P15",
+    name: "Couture Airbag (Air Bag Sewing)",
+    enName: "Air Bag Sewing",
+    icon: "🧵",
+    description: "Couture des zones de déploiement d'airbag latéral : fil affaibli, aiguilles, tension, nombre de points, machine docu-seam, traçabilité bobines et essais de déchirement.",
+    criteria: [
+      { id: "15.1", theme: "Conformité & traçabilité des fils airbag", bp: true, fr: "Les bobines de fil utilisées pour la couture airbag (fil d'affaiblissement et renfort) sont-elles conformes, certifiées et scannées individuellement sur la machine ?", en: "Are thread spools used for airbag sewing (tear-seam and reinforcement thread) compliant, certified, and individually scanned at the machine?" },
+      { id: "15.2", theme: "Stockage maîtrisé des fils airbag", bp: false, fr: "Les fils airbag sont-ils stockés dans une zone dédiée à température/hygrométrie contrôlées et protégés des UV et de la poussière ?", en: "Are airbag threads stored in a dedicated temperature/humidity-controlled area and protected from UV and dust?" },
+      { id: "15.3", theme: "Séparation stricte des fils standard et airbag", bp: false, fr: "Les couleurs, conditionnements ou détrompeurs empêchent-ils toute utilisation d'un fil standard sur une couture airbag ?", en: "Do colors, packaging, or poka-yokes prevent any use of standard thread on an airbag seam?" },
+      { id: "15.4", theme: "Conformité des coiffes et composants découpés", bp: false, fr: "Les pièces de tissu/cuir et sangles de guidage airbag sont-elles identifiées et conformes aux gabarits avant couture ?", en: "Are fabric/leather panels and airbag guide straps identified and compliant with templates prior to sewing?" },
+      { id: "15.5", theme: "Qualification spécifique des couturières airbag", bp: false, fr: "Les opérateurs réalisant les coutures airbag disposent-ils d'une habilitation spécifique valide et renouvelée périodiquement ?", en: "Do operators performing airbag seams hold a specific valid authorization that is periodically renewed?" },
+      { id: "15.6", theme: "Machine de couture instrumentée (Docu-Seam)", bp: true, fr: "La couture airbag est-elle réalisée exclusivement sur une machine instrumentée surveillant en temps réel la tension du fil, le nombre de points et les casses ?", en: "Is airbag sewing performed exclusively on an instrumented machine monitoring thread tension, stitch count, and breaks in real time?" },
+      { id: "15.7", theme: "Verrouillage des paramètres de couture", bp: true, fr: "Les paramètres machine (longueur de point, tension supérieure/canette, vitesse, programme de couture) sont-ils verrouillés ?", en: "Are machine parameters (stitch length, upper/bobbin tension, speed, sewing program) locked?" },
+      { id: "15.8", theme: "Maîtrise du changement d'aiguille", bp: false, fr: "Le type d'aiguille est-il contrôlé et tout remplacement d'aiguille cassée fait-il l'objet d'une procédure stricte (récupération de 100% des morceaux) ?", en: "Is the needle type controlled and is any broken needle replacement governed by a strict procedure (recovery of 100% of fragments)?" },
+      { id: "15.9", theme: "Contrôle tension de canette et remplissage", bp: false, fr: "La tension des canettes est-elle mesurée au dynamomètre avant montage et les canettes sont-elles dédiées exclusivement à l'airbag ?", en: "Is bobbin tension measured with a tensiometer before installation and are bobbins dedicated exclusively to airbag?" },
+      { id: "15.10", theme: "OK 1ère pièce Produit (Longueur, Points, Aspect)", bp: true, fr: "Un contrôle OK 1ère pièce complet (positionnement de la couture, longueur, nombre de points, points d'arrêt, aspect) est-il réalisé au démarrage ?", en: "Is a complete OK 1st part check (seam positioning, length, stitch count, backtacks, appearance) performed at startup?" },
+      { id: "15.11", theme: "Essai destructif de résistance de couture", bp: false, fr: "Des éprouvettes de couture sont-elles réalisées et testées en traction selon la fréquence définie pour vérifier la force de rupture du fil ?", en: "Are seam test specimens sewn and tensile-tested at the defined frequency to verify thread breaking strength?" },
+      { id: "15.12", theme: "Réaction immédiate sur défaut de couture", bp: true, fr: "En cas d'alarme machine (casse fil, manque de points, tension hors tolérance), le cycle est-il bloqué et la coiffe isolée ?", en: "In case of machine alarm (thread break, missing stitches, out-of-tolerance tension), is the cycle blocked and the cover isolated?" },
+      { id: "15.13", theme: "Interdiction de reprise sur couture airbag", bp: true, fr: "Toute reprise (surpiqûre ou décousage) sur la zone de couture airbag est-elle strictement interdite et entraîne-t-elle le rebut immédiat ?", en: "Is any rework (over-sewing or unpicking) on the airbag seam zone strictly prohibited and does it result in immediate scrap?" },
+      { id: "15.14", theme: "Contrôle des sangles et étiquettes airbag", bp: false, fr: "La présence, le sens de montage et la couture des sangles de guidage (chutes) et étiquettes airbag sont-ils contrôlés à 100% ?", en: "Are the presence, assembly orientation, and sewing of guide straps (chutes) and airbag labels 100% inspected?" },
+      { id: "15.15", theme: "Scan et validation code-barres coiffe", bp: false, fr: "Chaque coiffe airbag possède-t-elle un code-barres unique scanné en début et fin de couture pour valider le cycle ?", en: "Does each airbag cover have a unique barcode scanned at the start and end of sewing to validate the cycle?" },
+      { id: "15.16", theme: "Détection aiguille cassée (Détecteur de métaux)", bp: false, fr: "Les coiffes passent-elles dans un détecteur de métaux ou font-elles l'objet d'un contrôle garantissant l'absence de fragment d'aiguille ?", en: "Do covers pass through a metal detector or undergo inspection guaranteeing absence of needle fragments?" },
+      { id: "15.17", theme: "Test Poka-Yoke capteur tension/casse fil", bp: false, fr: "Les capteurs de surveillance de la machine docu-seam sont-ils testés à chaque début d'équipe ?", en: "Are monitoring sensors of the docu-seam machine tested at the start of every shift?" },
+      { id: "15.18", theme: "Maintenance préventive machines à coudre", bp: false, fr: "Le nettoyage des griffes, du crochet, des tendeurs et le contrôle de synchronisation aiguille/crochet sont-ils réalisés selon planning ?", en: "Are cleaning of feed dogs, hook, tensioners, and needle/hook timing checks performed per schedule?" },
+      { id: "15.19", theme: "Archivage des données Docu-Seam", bp: false, fr: "Les enregistrements numériques de chaque couture airbag (courbes tension, opérateur, lot fil, date/heure) sont-ils archivés ?", en: "Are digital records of each airbag seam (tension curves, operator, thread batch, date/time) archived?" },
+      { id: "15.20", theme: "Destruction des coiffes airbag rebutées", bp: false, fr: "Toute coiffe airbag déclarée NOK est-elle immédiatement découpée dans la zone airbag pour empêcher toute réutilisation ?", en: "Is any airbag cover declared NOK immediately cut through the airbag zone to prevent any reuse?" },
+      { id: "15.21", theme: "Protection des coiffes finies avant expédition", bp: false, fr: "Les coiffes airbag conformes sont-elles conditionnées dans des bacs propres, fermés et identifiés avec étiquette S/R ?", en: "Are compliant airbag covers packed in clean, closed bins identified with an S/R label?" }
+    ]
+  },
+  {
+    id: 16,
+    code: "P16",
+    name: "Soudage MIG / MAG / TIG",
+    enName: "MIG / MAG / TIG Welding",
+    icon: "⚡",
+    description: "Soudage à l'arc robotisé ou manuel : DMOS/QMOS, paramètres électriques, débit de gaz, trajectoire robot (TCP), contrôle visuel et coupes macrographiques.",
+    criteria: [
+      { id: "16.1", theme: "Descriptif de Mode Opératoire de Soudage (DMOS/WPS)", bp: false, fr: "Un DMOS validé (basé sur une QMOS) est-il disponible et affiché pour chaque assemblage soudé S/R ?", en: "Is a validated Welding Procedure Specification (WPS/DMOS based on PQR) available and displayed for each S/R welded assembly?" },
+      { id: "16.2", theme: "Conformité fil d'apport et gaz de protection", bp: false, fr: "Le fil d'apport (nuance, diamètre) et le gaz de protection (composition, pureté) sont-ils conformes au DMOS et identifiés ?", en: "Are filler wire (grade, diameter) and shielding gas (composition, purity) compliant with the WPS and identified?" },
+      { id: "16.3", theme: "Propreté et préparation des pièces avant soudage", bp: false, fr: "Les zones à souder sont-elles exemptes d'huile, de rouille, de calamine ou de bavures excessives ?", en: "Are weld zones free from oil, rust, mill scale, or excessive burrs?" },
+      { id: "16.4", theme: "Jeu d'accostage et maintien en gabarit", bp: false, fr: "Les gabarits de soudage garantissent-ils un jeu d'accostage conforme et un bridage efficace des composants ?", en: "Do welding jigs ensure compliant fit-up gap and effective clamping of components?" },
+      { id: "16.5", theme: "Verrouillage des paramètres de soudage", bp: true, fr: "Les paramètres critiques (courant/intensité, tension, vitesse d'avance fil, vitesse robot, débit de gaz) sont-ils verrouillés ?", en: "Are critical parameters (current/amperage, voltage, wire feed speed, robot speed, gas flow) locked?" },
+      { id: "16.6", theme: "Surveillance en temps réel des paramètres d'arc", bp: true, fr: "Le générateur de soudage surveille-t-il en continu l'intensité, la tension et le débit de gaz avec alarme et blocage en cas de hors tolérance ?", en: "Does the welding power source continuously monitor current, voltage, and gas flow with alarm and blocking if out of tolerance?" },
+      { id: "16.7", theme: "Vérification du TCP (Tool Center Point) robot", bp: false, fr: "La trajectoire et le TCP de la torche robot sont-ils vérifiés périodiquement (et après chaque collision) à l'aide d'un dispositif de contrôle ?", en: "Are robot torch path and TCP verified periodically (and after every collision) using a checking device?" },
+      { id: "16.8", theme: "Station de nettoyage torche et coupe-fil", bp: false, fr: "Le nettoyage automatique de la buse, la pulvérisation anti-adhérent et la coupe du fil sont-ils programmés à fréquence définie ?", en: "Are automatic nozzle cleaning, anti-spatter spraying, and wire cutting programmed at a defined frequency?" },
+      { id: "16.9", theme: "Remplacement préventif des consommables torche", bp: false, fr: "Le tube contact, le diffuseur et la buse sont-ils remplacés selon un compteur de cycles défini avant dérive de l'arc ?", en: "Are contact tip, gas diffuser, and nozzle replaced per a defined cycle counter prior to arc drift?" },
+      { id: "16.10", theme: "OK 1ère pièce Produit (Visuel & Macrographie)", bp: true, fr: "Un contrôle OK 1ère pièce (longueur et position des cordons, gorge, absence de caniveaux/porosités, coupe macrographique de pénétration) est-il validé ?", en: "Is an OK 1st part check (weld bead length and position, throat thickness, absence of undercut/porosity, penetration macro cut) validated?" },
+      { id: "16.11", theme: "Critères d'acceptation visuels (ISO 5817)", bp: false, fr: "Les opérateurs et contrôleurs disposent-ils de standards visuels clairs (limites de porosités, projections, cratères, manque de fusion) ?", en: "Do operators and inspectors have clear visual standards (limits for porosity, spatter, craters, lack of fusion)?" },
+      { id: "16.12", theme: "Contrôle 100% visuel des soudures S/R", bp: false, fr: "Toutes les soudures S/R font-elles l'objet d'un contrôle visuel à 100% (ou vision automatisée) sous un éclairage adapté ?", en: "Do all S/R welds undergo 100% visual inspection (or automated vision) under suitable lighting?" },
+      { id: "16.13", theme: "Coupes macrographiques périodiques", bp: false, fr: "Des coupes macrographiques sont-elles réalisées selon la fréquence du plan de surveillance pour vérifier la pénétration et l'absence de défauts internes ?", en: "Are macrographic cross-sections performed per the control plan frequency to verify penetration and absence of internal defects?" },
+      { id: "16.14", theme: "Qualification des soudeurs / opérateurs", bp: false, fr: "Les soudeurs manuels (y compris pour les reprises autorisées) et opérateurs robot sont-ils qualifiés selon norme (ISO 9606 / ISO 14732) ?", en: "Are manual welders (including for authorized rework) and robot operators qualified per standard (ISO 9606 / ISO 14732)?" },
+      { id: "16.15", theme: "Maîtrise stricte de la reprise de soudure", bp: true, fr: "Toute reprise de soudure est-elle encadrée par une instruction validée (nombre de reprises max = 1, longueur, contrôle 100% après reprise) ?", en: "Is any weld rework governed by a validated instruction (max rework count = 1, length, 100% inspection post-rework)?" },
+      { id: "16.16", theme: "Interdiction de ressoudage sur zones critiques", bp: false, fr: "Les zones où le ressoudage est strictement interdit (risque métallurgique ou géométrique) sont-elles clairement identifiées ?", en: "Are zones where re-welding is strictly prohibited (metallurgical or geometric risk) clearly identified?" },
+      { id: "16.17", theme: "Détection présence composants dans le gabarit", bp: false, fr: "Des capteurs sur le montage vérifient-ils la présence et le bon positionnement de chaque pièce avant autorisation de soudage ?", en: "Do fixture sensors verify the presence and correct positioning of every part before enabling welding?" },
+      { id: "16.18", theme: "Gestion des interruptions d'arc en cours de cycle", bp: true, fr: "En cas d'interruption d'arc ou d'arrêt d'urgence pendant le cycle, la pièce est-elle automatiquement bloquée et identifiée comme suspecte ?", en: "In case of arc interruption or emergency stop during the cycle, is the part automatically blocked and identified as suspect?" },
+      { id: "16.19", theme: "Vérification de la mise à la masse (retour courant)", bp: false, fr: "Les câbles et patins de masse du gabarit sont-ils entretenus pour garantir un passage de courant stable et sans amorçage parasite ?", en: "Are fixture ground cables and pads maintained to ensure stable current flow without stray arcing?" },
+      { id: "16.20", theme: "Test Poka-Yoke capteurs et alarmes soudage", bp: false, fr: "Les capteurs de présence pièces et alarmes de défaut d'arc/gaz sont-ils testés à chaque démarrage d'équipe ?", en: "Are part presence sensors and arc/gas fault alarms tested at every shift startup?" },
+      { id: "16.21", theme: "Contrôle géométrique après soudage", bp: false, fr: "Les déformations dues au retrait thermique sont-elles maîtrisées et vérifiées sur gabarit de contrôle selon le plan de surveillance ?", en: "Are distortions due to thermal shrinkage controlled and verified on a checking fixture per the control plan?" }
+    ]
+  },
+  {
+    id: 17,
+    code: "P17",
+    name: "Soudage Laser (Laser Welding)",
+    enName: "Laser Welding",
+    icon: "🔦",
+    description: "Soudage laser haute précision (scanner PFO, fibre) : jeu d'accostage critique, puissance laser, focalisation, surveillance optique (4D LWM), propreté et macrographies.",
+    criteria: [
+      { id: "17.1", theme: "Descriptif de Mode Opératoire Soudage Laser", bp: false, fr: "Un DMOS Laser validé précise-t-il l'ensemble des paramètres optiques et cinématiques (puissance, vitesse, focale, oscillation/wobble, gaz) ?", en: "Does a validated Laser WPS specify all optical and kinematic parameters (power, speed, focal length, oscillation/wobble, gas)?" },
+      { id: "17.2", theme: "Maîtrise stricte du jeu d'accostage (Gap)", bp: true, fr: "Le jeu maximal entre pièces à souder (généralement < 0,1 - 0,2 mm) est-il garanti par la géométrie des pièces et la force de bridage ?", en: "Is the maximum gap between parts to be welded (typically < 0.1 - 0.2 mm) guaranteed by part geometry and clamping force?" },
+      { id: "17.3", theme: "Propreté des surfaces (dégraissage laser/chimique)", bp: false, fr: "Les zones d'assemblage sont-elles exemptes d'huile, graisse, revêtement zinc excessif ou oxydation (nettoyage laser préalable si requis) ?", en: "Are joint areas free from oil, grease, excessive zinc coating, or oxidation (prior laser cleaning if required)?" },
+      { id: "17.4", theme: "Vérification du bridage et des appuis", bp: false, fr: "La pression des vérins de bridage et la propreté des appuis (absence de projections) sont-elles surveillées à chaque cycle ?", en: "Are clamping cylinder pressures and datum pad cleanliness (absence of spatter) monitored on every cycle?" },
+      { id: "17.5", theme: "Verrouillage des paramètres laser et robot/scanner", bp: true, fr: "Les recettes laser (puissance, profil temporel, trajectoire scanner PFO, vitesse) sont-elles verrouillées et protégées ?", en: "Are laser recipes (power, pulse shaping, PFO scanner path, speed) locked and protected?" },
+      { id: "17.6", theme: "Mesure périodique de la puissance laser", bp: false, fr: "La puissance réelle du faisceau laser en sortie de tête est-elle mesurée au wattmètre à fréquence définie ?", en: "Is the actual laser beam power at the head output measured with a power meter at a defined frequency?" },
+      { id: "17.7", theme: "Vérification de la focalisation et du faisceau", bp: false, fr: "La position du point focal et la qualité du faisceau sont-elles vérifiées périodiquement et après toute intervention optique ?", en: "Are focal point position and beam quality verified periodically and after any optical intervention?" },
+      { id: "17.8", theme: "Surveillance en ligne (ex: 4D LWM / Photodiodes)", bp: true, fr: "Chaque soudure laser est-elle surveillée en temps réel par un système optique (rayonnement plasma, température, réflexion) avec fenêtres verrouillées ?", en: "Is every laser weld monitored in real time by an optical system (plasma radiation, temperature, back-reflection) with locked windows?" },
+      { id: "17.9", theme: "Blocage/Éjection automatique si courbe LWM NOK", bp: true, fr: "Tout cordon laser présentant un signal optique hors fenêtre est-il immédiatement déclaré NOK avec blocage/éjection automatique de la pièce ?", en: "Is any laser weld exhibiting an out-of-window optical signal immediately declared NOK with automatic part blocking/ejection?" },
+      { id: "17.10", theme: "Protection des optiques et verre de protection", bp: false, fr: "L'état du verre de protection (cover slide) est-il surveillé (capteur de température/diffusion) et remplacé préventivement en environnement propre ?", en: "Is the condition of the protective cover slide monitored (temperature/scattering sensor) and preventively replaced in a clean environment?" },
+      { id: "17.11", theme: "Maîtrise du flux d'air laminaire (Cross-jet)", bp: false, fr: "La pression et l'orientation du flux d'air transversal (cross-jet) protégeant l'optique des fumées et projections sont-elles surveillées ?", en: "Are pressure and orientation of the cross-jet air knife protecting optics from fumes and spatter monitored?" },
+      { id: "17.12", theme: "Aspiration des fumées de soudage laser", bp: false, fr: "Le système d'extraction des fumées est-il efficace et surveillé pour éviter toute atténuation du faisceau laser par le panache ?", en: "Is the fume extraction system effective and monitored to prevent any attenuation of the laser beam by the plume?" },
+      { id: "17.13", theme: "Gaz de protection / d'assistance (si applicable)", bp: false, fr: "Le débit et la pureté du gaz d'assistance/protection sont-ils régulés avec arrêt automatique en cas de dérive ?", en: "Are flow rate and purity of assist/shielding gas regulated with automatic stop on drift?" },
+      { id: "17.14", theme: "OK 1ère pièce Produit (Macrographie & Aspect)", bp: true, fr: "Un contrôle OK 1ère pièce incluant contrôle visuel et coupe macrographique (largeur à l'interface, pénétration, absence de fissures/porosités) est-il validé ?", en: "Is an OK 1st part check including visual inspection and macrographic cross-section (interface width, penetration, absence of cracks/porosity) validated?" },
+      { id: "17.15", theme: "Contrôle de la largeur de soudure à l'interface", bp: false, fr: "La largeur minimale du cordon au plan de joint (critère clé de résistance mécanique) est-elle mesurée sur les coupes macrographiques ?", en: "Is the minimum weld width at the faying interface (key mechanical strength criterion) measured on macrographic sections?" },
+      { id: "17.16", theme: "Contrôle absence de fissuration à chaud / cratères", bp: false, fr: "Les extrémités des cordons (rampes de fin de tir) et le centre du cordon sont-ils contrôlés contre les fissures de retrait ou trous ?", en: "Are weld ends (ramp-down zones) and weld centerlines inspected against shrinkage cracks or pinholes?" },
+      { id: "17.17", theme: "Contrôle 100% visuel / caméra des cordons laser", bp: false, fr: "L'aspect supérieur du cordon laser (continuité, position, absence de projections ou manque de matière) est-il contrôlé à 100% ?", en: "Is the top appearance of the laser weld (continuity, position, absence of spatter or underfill) 100% inspected?" },
+      { id: "17.18", theme: "Essais mécaniques destructifs (Traction / Torsion)", bp: false, fr: "Des essais mécaniques destructifs (effort de rupture) sont-ils réalisés selon la fréquence du plan de surveillance ?", en: "Are destructive mechanical tests (breaking force) performed per the control plan frequency?" },
+      { id: "17.19", theme: "Interdiction stricte de repassage laser non validé", bp: true, fr: "Le repassage du faisceau laser sur un cordon déjà soudé est-il strictement interdit (sauf gamme de reprise qualifiée et approuvée) ?", en: "Is re-running the laser beam over an already welded seam strictly prohibited (unless via a qualified and approved rework routing)?" },
+      { id: "17.20", theme: "Vérification de la position du faisceau (Focus/Grid)", bp: false, fr: "La précision de positionnement du scanner PFO ou de la tête robot est-elle vérifiée périodiquement sur plaque cible ?", en: "Is positioning accuracy of the PFO scanner or robot head periodically verified on a target plate?" },
+      { id: "17.21", theme: "Maîtrise du refroidissement de la source laser", bp: false, fr: "La température et la conductivité de l'eau du groupe froid (chiller) sont-elles surveillées en continu ?", en: "Are temperature and conductivity of the chiller cooling water continuously monitored?" },
+      { id: "17.22", theme: "Détection présence composants avant tir laser", bp: false, fr: "Les capteurs de présence et d'orientation empêchent-ils tout tir laser si une pièce est absente ou mal positionnée ?", en: "Do presence and orientation sensors prevent any laser firing if a part is missing or mispositioned?" },
+      { id: "17.23", theme: "Test Poka-Yoke système LWM au démarrage", bp: false, fr: "Le système de surveillance optique (4D LWM) est-il testé à chaque équipe (ex: pièce maître avec jeu calibré ou capteur simulé) ?", en: "Is the optical monitoring system (4D LWM) tested every shift (e.g., master part with calibrated gap or simulated sensor)?" },
+      { id: "17.24", theme: "Habilitation opérateurs et régleurs laser", bp: false, fr: "Le personnel intervenant sur les cellules laser est-il formé à la qualité du soudage laser et à la sécurité laser ?", en: "Is personnel working on laser cells trained in laser welding quality and laser safety?" },
+      { id: "17.25", theme: "Traçabilité courbes LWM par numéro de série", bp: false, fr: "Les données de surveillance optique de chaque pièce soudée au laser sont-elles archivées et liées à son identifiant unique ?", en: "Is optical monitoring data for each laser-welded part archived and linked to its unique identifier?" },
+      { id: "17.26", theme: "Maintenance préventive cellule et optiques", bp: false, fr: "Le plan de maintenance préventive couvre-t-il l'étanchéité de la tête optique, les miroirs du scanner, les filtres et le bridage ?", en: "Does the preventive maintenance plan cover optical head sealing, scanner mirrors, filters, and clamping?" }
+    ]
+  },
+  {
+    id: 18,
+    code: "P18",
+    name: "Soudage par Résistance",
+    enName: "Resistance Welding (Spot / Projection)",
+    icon: "🔌",
+    description: "Soudage par points et par bossages (écrou/vis à souder) : courant, effort électrodes, refroidissement, rodage électrodes, déboutonnage et contrôle anti-pénétration.",
+    criteria: [
+      { id: "18.1", theme: "Paramètres de soudage par résistance (DMOS)", bp: false, fr: "Les paramètres validés (intensité de soudage, temps de soudage, effort d'accostage/forgeage, pulsations) sont-ils documentés ?", en: "Are validated parameters (welding current, weld time, squeeze/forging force, pulses) documented?" },
+      { id: "18.2", theme: "Verrouillage des contrôleurs de soudage", bp: true, fr: "Les programmes des armoires de soudage par résistance sont-ils verrouillés par mot de passe ou clé ?", en: "Are resistance welding controller programs locked by password or key?" },
+      { id: "18.3", theme: "Surveillance Courant, Temps et Effort/Déplacement", bp: true, fr: "Chaque point/bossage est-il surveillé en temps réel (courant secondaire, résistance dynamique, enfoncement/course électrode) ?", en: "Is each spot/projection monitored in real time (secondary current, dynamic resistance, electrode indentation/displacement)?" },
+      { id: "18.4", theme: "Blocage cycle si point/bossage NOK", bp: true, fr: "En cas de dérive de courant, manque d'effort ou course hors tolérance (écrou absent/à l'envers), le cycle est-il immédiatement bloqué ?", en: "In case of current drift, lack of force, or out-of-tolerance stroke (missing/inverted nut), is the cycle immediately blocked?" },
+      { id: "18.5", theme: "Refroidissement des électrodes", bp: false, fr: "Le débit et la température de l'eau de refroidissement des électrodes sont-ils surveillés avec arrêt automatique si débit insuffisant ?", en: "Are flow rate and temperature of electrode cooling water monitored with automatic stop if flow is insufficient?" },
+      { id: "18.6", theme: "Maintenance, fraisage et remplacement électrodes", bp: false, fr: "La géométrie de la face active des électrodes est-elle maintenue par fraisage automatique ou remplacement selon compteur de points ?", en: "Is the geometry of the electrode working face maintained by automatic tip dressing or replacement per spot counter?" },
+      { id: "18.7", theme: "Poka-Yoke positionnement écrous / vis à souder", bp: false, fr: "Des broches isolées (céramique/revêtues) et capteurs de présence empêchent-ils le soudage d'un écrou absent, de travers ou à l'envers ?", en: "Do insulated pins (ceramic/coated) and presence sensors prevent welding a missing, tilted, or upside-down nut?" },
+      { id: "18.8", theme: "État et isolation des broches de centrage", bp: false, fr: "Les broches de centrage des écrous à souder sont-elles contrôlées régulièrement (usure, isolement électrique pour éviter les shunts) ?", en: "Are weld nut locating pins regularly inspected (wear, electrical insulation to prevent shunting)?" },
+      { id: "18.9", theme: "OK 1ère pièce Produit (Déboutonnage / Arrachement)", bp: true, fr: "Un contrôle OK 1ère pièce (test au burin non destructif, essai destructif de déboutonnage/arrachement d'écrou, mesure diamètre noyau) est-il réalisé ?", en: "Is an OK 1st part check (non-destructive chisel test, destructive peel/nut push-off test, nugget diameter measurement) performed?" },
+      { id: "18.10", theme: "Essai destructif d'arrachement / déboutonnage", bp: false, fr: "Des essais destructifs périodiques (effort d'arrachement d'écrou ou diamètre de noyau soudé) sont-ils réalisés et enregistrés ?", en: "Are periodic destructive tests (nut push-off force or weld nugget diameter) performed and recorded?" },
+      { id: "18.11", theme: "Contrôle des projections et filetage écrou", bp: false, fr: "L'absence de projections de métal sur les filets des écrous/vis soudés est-elle vérifiée (calibre fileté) ?", en: "Is the absence of weld spatter on weld nut/stud threads verified (thread gage)?" },
+      { id: "18.12", theme: "Interdiction de double tir sur point/bossage NOK", bp: true, fr: "Il est-il strictement interdit de ressouder sur un point ou un bossage déjà soudé (risque d'écrasement sans fusion) ?", en: "Is it strictly prohibited to re-weld over an already welded spot or projection (risk of flattening without fusion)?" },
+      { id: "18.13", theme: "Règle d'ajout d'un point de secours (si autorisé)", bp: false, fr: "L'ajout éventuel d'un point de soudure adjacent en cas de point NOK est-il uniquement autorisé s'il est prévu sur le plan/gamme validée ?", en: "Is the possible addition of an adjacent weld spot in case of an NOK spot only permitted if specified on the validated drawing/routing?" },
+      { id: "18.14", theme: "Comptage automatique du nombre de points", bp: false, fr: "L'armoire de soudage vérifie-t-elle que le nombre exact de points programmés a été réalisé et validé sur chaque pièce ?", en: "Does the welding controller verify that the exact number of programmed spots has been executed and validated on each part?" },
+      { id: "18.15", theme: "Contrôle des bossages sur composants entrants", bp: false, fr: "La hauteur et la géométrie des bossages des pièces/écrous entrants sont-elles conformes avant soudage ?", en: "Are height and geometry of projections on incoming parts/nuts compliant prior to welding?" },
+      { id: "18.16", theme: "Test Poka-Yoke au démarrage d'équipe", bp: false, fr: "Les détections de défaut (ex: simulation écrou absent/retourné ou défaut d'effort) sont-elles testées à chaque début d'équipe ?", en: "Are defect detections (e.g., simulating missing/inverted nut or force fault) tested at the start of every shift?" },
+      { id: "18.17", theme: "Maîtrise des shunts et pièces propres", bp: false, fr: "Les pièces à souder sont-elles exemptes d'huile isolante excessive ou de corrosion et les contacts électriques du montage sont-ils propres ?", en: "Are parts to be welded free from excessive insulating oil or corrosion and are fixture electrical contacts clean?" }
+    ]
+  },
+  {
+    id: 19,
+    code: "P19",
+    name: "Ligne d'assemblage Mécanismes",
+    enName: "Assembly Line Mechanism (Recliners / Tracks)",
+    icon: "⚙️",
+    description: "Assemblage des mécanismes de sièges (articulations/recliners, glissières/tracks, réhausse) : propreté, graissage, détrompage composants, essais fonctionnels 100%.",
+    criteria: [
+      { id: "19.1", theme: "Conformité et traçabilité composants mécanisme", bp: false, fr: "Tous les composants critiques (flasques dentées, cliquets, cames, ressorts, profilés de glissière) sont-ils conformes et tracés par lot ?", en: "Are all critical components (toothed plates, pawls, cams, springs, track profiles) compliant and traced by batch?" },
+      { id: "19.2", theme: "Propreté des postes et prévention corps étrangers", bp: false, fr: "Les postes d'assemblage mécanismes sont-ils maintenus propres et protégés contre l'intrusion de copeaux, vis ou corps étrangers ?", en: "Are mechanism assembly stations kept clean and protected against intrusion of chips, screws, or foreign objects?" },
+      { id: "19.3", theme: "Maîtrise du graissage (type, quantité, position)", bp: false, fr: "La graisse appliquée sur les engrenages/chemins de billes est-elle conforme, dosée automatiquement et contrôlée (vision/poids) ?", en: "Is grease applied on gears/ball tracks compliant, automatically dosed, and verified (vision/weight)?" },
+      { id: "19.4", theme: "Poka-Yoke présence et sens des composants internes", bp: true, fr: "Des capteurs ou systèmes de vision vérifient-ils la présence et la bonne orientation de chaque composant interne (cliquets, ressorts, billes) ?", en: "Do sensors or vision systems verify the presence and correct orientation of every internal component (pawls, springs, balls)?" },
+      { id: "19.5", theme: "Prévention des inversions Droite / Gauche (LH/RH)", bp: false, fr: "Des détrompeurs mécaniques sur les posages empêchent-ils tout montage inversé entre mécanismes gauche et droit ?", en: "Do mechanical poka-yokes on fixtures prevent any inverted assembly between left-hand and right-hand mechanisms?" },
+      { id: "19.6", theme: "Maîtrise de la précharge des ressorts", bp: false, fr: "La mise en place et la précharge des ressorts de rappel sont-elles contrôlées sans risque de déformation ou d'échappement ?", en: "Are installation and preload of return springs controlled without risk of deformation or slipping?" },
+      { id: "19.7", theme: "Contrôle sertissage / fermeture du boîtier", bp: false, fr: "L'opération de fermeture (sertissage bord tombé ou soudage laser) est-elle surveillée en effort/déplacement ou paramètres optiques ?", en: "Is the closing operation (hem crimping or laser welding) monitored via force/displacement or optical parameters?" },
+      { id: "19.8", theme: "Banc de test fonctionnel 100% fin de ligne", bp: true, fr: "Chaque mécanisme assemblé passe-t-il un test fonctionnel 100% (couple de manœuvre, déverrouillage, verrouillage sur plusieurs crans, jeu) ?", en: "Does every assembled mechanism pass a 100% functional test (operating torque, unlocking, locking across multiple teeth, backlash)?" },
+      { id: "19.9", theme: "Verrouillage des seuils du banc de test", bp: true, fr: "Les limites d'acceptation du banc de test fonctionnel (couples min/max, angles, efforts) sont-elles verrouillées par mot de passe ?", en: "Are the acceptance limits of the functional test bench (min/max torques, angles, forces) password-locked?" },
+      { id: "19.10", theme: "Éjection/Blocage automatique si test NOK", bp: false, fr: "Tout mécanisme échouant au banc de test fonctionnel est-il automatiquement marqué NOK et éjecté dans un bac rouge verrouillé ?", en: "Is any mechanism failing the functional test bench automatically marked NOK and ejected into a locked red bin?" },
+      { id: "19.11", theme: "OK 1ère pièce Produit (Fonctionnel & Dimensionnel)", bp: false, fr: "Un contrôle OK 1ère pièce complet est-il validé au démarrage d'équipe et après tout changement de série ?", en: "Is a complete OK 1st part check validated at shift startup and after every changeover?" },
+      { id: "19.12", theme: "Test Poka-Yoke banc de test (Pièces maîtres)", bp: false, fr: "Le banc de test fonctionnel est-il vérifié à chaque équipe avec des pièces maîtres représentant des défauts (ex: cran bloqué, jeu excessif) ?", en: "Is the functional test bench verified every shift with master parts representing defects (e.g., jammed tooth, excessive play)?" },
+      { id: "19.13", theme: "Interdiction de démontage/reprise interne", bp: false, fr: "Tout mécanisme serti/fermé déclaré NOK est-il systématiquement rebuté sans ouverture ni récupération de composants internes ?", en: "Is any crimped/closed mechanism declared NOK systematically scrapped without opening or salvaging internal components?" },
+      { id: "19.14", theme: "Contrôle d'enclenchement complet des crans", bp: false, fr: "Le test vérifie-t-il l'engagement complet des dentures de sécurité afin d'éviter tout risque de faux verrouillage ?", en: "Does the test verify full engagement of safety gear teeth to prevent any risk of false locking?" },
+      { id: "19.15", theme: "Contrôle des efforts de coulissement (Glissières)", bp: false, fr: "Sur les glissières, l'effort de coulissement sur toute la course et l'effort de déverrouillage sont-ils mesurés à 100% ?", en: "On seat tracks, are sliding effort across full travel and unlocking effort 100% measured?" },
+      { id: "19.16", theme: "Vérification des butées de fin de course", bp: false, fr: "La présence et la résistance des butées mécaniques de fin de course sont-elles garanties ?", en: "Are the presence and strength of mechanical end-of-travel stops guaranteed?" },
+      { id: "19.17", theme: "Essais destructifs périodiques (Résistance statique)", bp: false, fr: "Des essais destructifs de résistance au couple/charge ultime sont-ils réalisés au laboratoire selon le plan de surveillance ?", en: "Are destructive ultimate torque/load strength tests performed in the laboratory per the control plan?" },
+      { id: "19.18", theme: "Marquage unitaire DataMatrix après validation", bp: false, fr: "Le marquage DataMatrix de traçabilité est-il gravé et relu uniquement après réussite à 100% de toutes les étapes et du banc EOL ?", en: "Is the traceability DataMatrix marking engraved and verified only after 100% pass of all stations and the EOL bench?" },
+      { id: "19.19", theme: "Protection contre les chocs après test", bp: false, fr: "Les mécanismes validés sont-ils conditionnés dans des alvéoles dédiées évitant tout choc sur les axes ou dentures ?", en: "Are validated mechanisms packed in dedicated cells preventing any impact on shafts or gear teeth?" },
+      { id: "19.20", theme: "Habilitation des opérateurs d'assemblage", bp: false, fr: "Les opérateurs sont-ils formés et habilités sur chaque poste de la ligne mécanisme ?", en: "Are operators trained and authorized on each workstation of the mechanism line?" },
+      { id: "19.21", theme: "Maintenance préventive des posages et bancs", bp: false, fr: "Les capteurs de couple, codeurs angulaires et posages de la ligne font-ils l'objet d'un étalonnage et d'une maintenance préventive ?", en: "Are torque sensors, angle encoders, and line fixtures subject to calibration and preventive maintenance?" }
+    ]
+  },
+  {
+    id: 20,
+    code: "P20",
+    name: "Cintrage de tubes",
+    enName: "Tube Bending",
+    icon: "➰",
+    description: "Cintrage CNC de tubes de structure : conformité des tubes, positionnement de soudure, outillages de cintrage (mandrin, efface-plis), ovalisation, amincissement et géométrie 3D.",
+    criteria: [
+      { id: "20.1", theme: "Conformité matière et géométrie tube entrant", bp: false, fr: "La nuance d'acier, le diamètre, l'épaisseur de paroi et les caractéristiques mécaniques (CCPU) des tubes entrants sont-ils vérifiés ?", en: "Are steel grade, diameter, wall thickness, and mechanical properties (CCPU) of incoming tubes verified?" },
+      { id: "20.2", theme: "Orientation du cordon de soudure du tube", bp: true, fr: "La position du cordon de soudure longitudinal du tube est-elle détectée et orientée automatiquement dans la zone neutre avant cintrage ?", en: "Is the longitudinal weld seam position of the tube automatically detected and oriented into the neutral zone prior to bending?" },
+      { id: "20.3", theme: "Lubrification interne du mandrin", bp: false, fr: "La lubrification du mandrin articulé et de l'efface-plis est-elle maîtrisée (débit, type) pour éviter le grippage ou la rupture ?", en: "Is lubrication of the articulated mandrel and wiper die controlled (flow rate, type) to prevent galling or breakage?" },
+      { id: "20.4", theme: "Verrouillage des programmes de cintrage CNC", bp: true, fr: "Les programmes de cintrage (angles, rayons, avance, vitesse, pression glissière/mandrin) sont-ils verrouillés par mot de passe ?", en: "Are bending programs (angles, radii, feed, speed, pressure die/mandrel pressure) password-locked?" },
+      { id: "20.5", theme: "État et montage des outillages de cintrage", bp: false, fr: "Les galets de cintrage, mors de serrage, mandrins et efface-plis sont-ils exempts d'usure et montés selon la fiche de réglage ?", en: "Are bend dies, clamp dies, mandrels, and wiper dies free from wear and installed per the setup sheet?" },
+      { id: "20.6", theme: "OK 1ère pièce Produit (Géométrie 3D & Angles)", bp: true, fr: "Un contrôle OK 1ère pièce complet (géométrie 3D sur MMT/bras optique ou gabarit, angles, longueurs droites) est-il réalisé au démarrage ?", en: "Is a complete OK 1st part check (3D geometry on CMM/optical arm or checking fixture, angles, straight lengths) performed at startup?" },
+      { id: "20.7", theme: "Contrôle d'ovalisation et d'amincissement paroi", bp: false, fr: "L'ovalisation dans les cintres et l'épaisseur résiduelle de paroi externe (amincissement) sont-elles mesurées selon le plan de surveillance ?", en: "Are ovality in bends and residual outer wall thickness (thinning) measured per the control plan?" },
+      { id: "20.8", theme: "Contrôle absence de plis, criques ou écrasement", bp: true, fr: "Les zones cintrées sont-elles contrôlées pour garantir l'absence de criques externes, de plis internes ou de marques de serrage excessives ?", en: "Are bent zones inspected to guarantee absence of external cracks, internal wrinkles, or excessive clamp marks?" },
+      { id: "20.9", theme: "Surveillance des efforts et glissement tube", bp: false, fr: "La cintreuse surveille-t-elle le couple/effort de cintrage ou l'absence de glissement du tube dans le mors de serrage ?", en: "Does the bending machine monitor bending torque/force or absence of tube slippage in the clamp die?" },
+      { id: "20.10", theme: "Interdiction de redressage manuel à froid", bp: false, fr: "Toute correction géométrique manuelle non validée (redressage à la barre ou au maillet) sur un tube S/R est-elle strictement interdite ?", en: "Is any unvalidated manual geometric correction (bar or mallet straightening) on an S/R tube strictly prohibited?" },
+      { id: "20.11", theme: "Gabarits de contrôle étalonnés au poste", bp: false, fr: "Les gabarits de contrôle géométrique sont-ils étalonnés, propres et utilisés à la fréquence définie par le plan de surveillance ?", en: "Are geometric checking fixtures calibrated, clean, and used at the frequency defined by the control plan?" },
+      { id: "20.12", theme: "Détection de rupture de mandrin", bp: false, fr: "La machine est-elle équipée d'une détection d'effort ou de position arrêtant le cycle en cas de casse d'une boule du mandrin ?", en: "Is the machine equipped with force or position detection stopping the cycle in case of a mandrel ball breakage?" },
+      { id: "20.13", theme: "Test Poka-Yoke détection soudure au démarrage", bp: false, fr: "Le capteur optique/magnétique de détection du cordon de soudure du tube est-il testé au démarrage d'équipe ?", en: "Is the optical/magnetic tube weld seam detection sensor tested at shift startup?" },
+      { id: "20.14", theme: "Propreté et dégraissage après cintrage", bp: false, fr: "Si le tube doit être soudé ensuite, le lubrifiant de cintrage est-il éliminé ou compatible avec le soudage ?", en: "If the tube is subsequently welded, is bending lubricant removed or compatible with welding?" },
+      { id: "20.15", theme: "Traçabilité et protection pendant stockage", bp: false, fr: "Les tubes cintrés sont-ils identifiés par lot et rangés dans des contenants évitant toute déformation élastique ou plastique ?", en: "Are bent tubes identified by batch and stored in containers preventing any elastic or plastic deformation?" }
+    ]
+  },
+  {
+    id: 21,
+    code: "P21",
+    name: "Cintrage de fils",
+    enName: "Wire Bending",
+    icon: "〰️",
+    description: "Cintrage 2D/3D de fils métalliques (armatures d'assise/dossier, tiges appui-tête) : conformité du fil, dressage, angles, chanfreins, crans et géométrie.",
+    criteria: [
+      { id: "21.1", theme: "Conformité matière et diamètre fil entrant (CCPU)", bp: true, fr: "La nuance d'acier, la résistance à la traction et le diamètre du fil entrant (CCPU) sont-ils vérifiés avant engagement ?", en: "Are steel grade, tensile strength, and diameter of incoming wire (CCPU) verified prior to loading?" },
+      { id: "21.2", theme: "Réglage et état des galets dresseurs", bp: false, fr: "Les galets de dressage sont-ils propres, sans marquage excessif et réglés pour garantir une rectitude stable sans écrouissage anormal ?", en: "Are straightening rollers clean, free from excessive scoring, and adjusted to ensure stable straightness without abnormal work hardening?" },
+      { id: "21.3", theme: "Verrouillage des programmes de cintrage fil", bp: true, fr: "Les programmes CNC de cintrage (avances, angles de pliage, rotations, vitesses) sont-ils verrouillés et protégés ?", en: "Are CNC wire bending programs (feeds, bend angles, rotations, speeds) locked and protected?" },
+      { id: "21.4", theme: "État des outils de pliage et couteaux de coupe", bp: false, fr: "Les doigts de cintrage, mandrins et lames de coupe sont-ils contrôlés régulièrement (usure, rayons) pour éviter les entailles sur le fil ?", en: "Are bending fingers, mandrels, and cutting blades regularly inspected (wear, radii) to avoid nicks on the wire?" },
+      { id: "21.5", theme: "OK 1ère pièce Produit (Géométrie & Plis)", bp: true, fr: "Un contrôle OK 1ère pièce (gabarit de contrôle 3D, cotes fonctionnelles, rayons de pliage, absence de criques) est-il réalisé au démarrage ?", en: "Is an OK 1st part check (3D checking fixture, functional dimensions, bend radii, absence of cracks) performed at startup?" },
+      { id: "21.6", theme: "Contrôle absence de criques et entailles", bp: true, fr: "Les rayons de cintrage serrés et les zones d'entraînement sont-ils contrôlés pour garantir l'absence de criques ou d'entailles profondes ?", en: "Are tight bend radii and feed drive zones inspected to guarantee absence of cracks or deep notches?" },
+      { id: "21.7", theme: "Conformité des extrémités (chanfreins / bavures)", bp: false, fr: "Les extrémités des fils coupés/chanfreinés sont-elles conformes (absence de bavures coupantes, géométrie du chanfrein) ?", en: "Are ends of cut/chamfered wires compliant (absence of sharp burrs, chamfer geometry)?" },
+      { id: "21.8", theme: "Contrôle des opérations secondaires (crans, écrasements)", bp: false, fr: "Si le fil comporte des crans d'appui-tête ou des écrasements, leur profondeur, pas et effort de formage sont-ils surveillés ?", en: "If the wire features headrest notches or flattenings, are their depth, pitch, and forming force monitored?" },
+      { id: "21.9", theme: "Maîtrise du retour élastique (Springback)", bp: false, fr: "Les variations de retour élastique lors des changements de bobine de fil sont-elles compensées et validées par un contrôle géométrique ?", en: "Are springback variations during wire coil changes compensated and validated by a geometric check?" },
+      { id: "21.10", theme: "Interdiction de retouche manuelle non validée", bp: false, fr: "Toute retouche manuelle sur une pièce fil S/R est-elle interdite (ou strictement encadrée si spécifiée dans la gamme) ?", en: "Is any manual rework on an S/R wire part prohibited (or strictly governed if specified in the routing)?" },
+      { id: "21.11", theme: "Contrôle de planéité et vrillage", bp: false, fr: "La planéité et l'absence de vrillage des cadres fil sont-elles vérifiées sur marbre ou gabarit selon le plan de surveillance ?", en: "Are flatness and absence of twist of wire frames verified on a surface plate or fixture per the control plan?" },
+      { id: "21.12", theme: "Séparation des pièces de réglage et fin de bobine", bp: false, fr: "Les pièces produites lors du réglage d'une nouvelle bobine sont-elles automatiquement isolées jusqu'à validation OK 1ère pièce ?", en: "Are parts produced during setup of a new coil automatically isolated until OK 1st part validation?" },
+      { id: "21.13", theme: "Traçabilité des bobines de fil et conditionnement", bp: false, fr: "Le numéro de lot de la bobine de fil est-il tracé et les pièces finies sont-elles conditionnées sans risque d'enchevêtrement ou déformation ?", en: "Is the wire coil batch number traced and are finished parts packed without risk of tangling or deformation?" }
+    ]
+  },
+  {
+    id: 22,
+    code: "P22",
+    name: "Forgeage à chaud",
+    enName: "Hot Forging",
+    icon: "⚒️",
+    description: "Forgeage à chaud de composants critiques : température de chauffe par induction, pyrométrie, éjection automatique hors température, matrices et contrôle métallurgique/ressuage.",
+    criteria: [
+      { id: "22.1", theme: "Conformité matière première (CCPU & Barre/Lopin)", bp: false, fr: "La nuance d'acier, la propreté inclusionnaire et le numéro de coulée (CCPU) des barres/lopins sont-ils vérifiés avant engagement ?", en: "Are steel grade, inclusion cleanliness, and heat number (CCPU) of bars/billets verified prior to loading?" },
+      { id: "22.2", theme: "Verrouillage paramètres chauffe par induction", bp: true, fr: "Les paramètres du four à induction (puissance, fréquence, temps de chauffe, débit) sont-ils verrouillés et protégés ?", en: "Are induction heater parameters (power, frequency, heating time, feed rate) locked and protected?" },
+      { id: "22.3", theme: "Mesure température pyromètre et tri automatique", bp: true, fr: "La température de chaque lopin en sortie d'induction est-elle mesurée par pyromètre étalonné avec éjection automatique si trop froid ou trop chaud (surchauffe) ?", en: "Is the temperature of every billet exiting the induction heater measured by a calibrated pyrometer with automatic ejection if too cold or overheated?" },
+      { id: "22.4", theme: "Température et lubrification des matrices", bp: false, fr: "Le préchauffage, le refroidissement et le graissage des matrices de forgeage sont-ils régulés et surveillés ?", en: "Are preheating, cooling, and lubrication of forging dies regulated and monitored?" },
+      { id: "22.5", theme: "Surveillance de l'effort de forgeage", bp: false, fr: "L'effort de frappe de la presse de forgeage est-il surveillé à chaque coup avec alarme en cas de sous-remplissage ou surcharge ?", en: "Is the forging press tonnage monitored on every stroke with alarm in case of underfill or overload?" },
+      { id: "22.6", theme: "OK 1ère pièce Produit (Dimensionnel & Fibrage)", bp: true, fr: "Un contrôle OK 1ère pièce (cotes critiques, bavure d'ébavurage, absence de replis de forge, macrographie) est-il validé au démarrage ?", en: "Is an OK 1st part check (critical dimensions, trimming flash, absence of forging laps, macrography) validated at startup?" },
+      { id: "22.7", theme: "Contrôle non destructif (Magnétoscopie / Ressuage)", bp: false, fr: "Un contrôle de détection de criques/replis (magnétoscopie, courants de Foucault ou ressuage) est-il réalisé selon le plan de surveillance ?", en: "Is a crack/lap detection inspection (magnetic particle, eddy current, or dye penetrant) performed per the control plan?" },
+      { id: "22.8", theme: "Maîtrise du refroidissement contrôlé après forge", bp: false, fr: "La vitesse et les conditions de refroidissement des pièces forgées (convoyeur, air soufflé) sont-elles maîtrisées pour garantir la structure métallurgique ?", en: "Are cooling rate and conditions of forged parts (conveyor, forced air) controlled to ensure metallurgical structure?" },
+      { id: "22.9", theme: "Test Poka-Yoke pyromètre et traçabilité coulée", bp: false, fr: "Le dispositif d'éjection hors température est-il testé à chaque équipe et la traçabilité par numéro de coulée est-elle garantie à 100% ?", en: "Is the out-of-temperature ejection device tested every shift and is heat number traceability 100% guaranteed?" }
+    ]
+  }
+];
+
+// Glossaire des acronymes S/R
+const GLOSSARY_TERMS = [
+  { term: "OK1P", full: "OK 1ère Pièce (OK First Part)", desc: "Validation formelle (Produit et Process) obligatoire avant tout démarrage de production, changement de série, changement de bobine/lot ou après intervention de maintenance." },
+  { term: "BP", full: "Point Bloquant (Blocking Point)", desc: "Critère critique d'audit (79 au total). Si un seul Point Bloquant est évalué NOK, la note globale de l'audit est automatiquement plafonnée/bloquée et un plan d'action immédiat est exigé." },
+  { term: "KPC", full: "Key Product Characteristic", desc: "Caractéristique clé du produit (dimension, résistance, géométrie) dont la variation affecte directement la sécurité ou la conformité réglementaire." },
+  { term: "KCC", full: "Key Control Characteristic", desc: "Paramètre clé du procédé (intensité de soudage, couple, température, effort) devant être maîtrisé et surveillé pour garantir la conformité d'une KPC." },
+  { term: "Poka-Yoke", full: "Système Anti-Erreur (Mistake Proofing)", desc: "Dispositif physique ou électronique empêchant de produire ou de laisser passer une pièce non conforme. Doit être testé à chaque début d'équipe avec une pièce maître." },
+  { term: "Red Rabbit", full: "Pièce Maître Défaut (Master Defect Part)", desc: "Échantillon étalon identifié en rouge comportant un défaut connu, utilisé pour vérifier le bon déclenchement des Poka-Yoke et capteurs au démarrage d'équipe." },
+  { term: "Clé Euchner", full: "Système d'identification électronique sécurisé", desc: "Clé RFID individuelle permettant de restreindre l'accès aux paramètres machines, au mode réglage ou au déverrouillage après un défaut (ex: desserrage visseuse) aux seules personnes habilitées." },
+  { term: "8D", full: "8 Disciplines (Résolution de Problèmes)", desc: "Méthode structurée obligatoire dès la détection d'un écart S/R : constitution d'équipe, endiguement immédiat (containment), recherche cause racine, actions correctives et préventives." },
+  { term: "LLS", full: "Lessons Learned Sheet", desc: "Fiche de retour d'expérience capitalisant les incidents qualité/S/R survenus sur un site afin de déployer les actions préventives transversalement sur toutes les usines Forvia." },
+  { term: "CCPU", full: "Certificat de Contrôle des Produits en Usine", desc: "Certificat matière (norme EN 10204 3.1) attestant de la composition chimique et des caractéristiques mécaniques réelles d'une coulée d'acier." },
+  { term: "TPM", full: "Total Productive Maintenance", desc: "Maintenance autonome réalisée quotidiennement par les opérateurs (nettoyage capteurs, vérification niveaux, inspection visuelle) complétant la maintenance préventive." },
+  { term: "EOL", full: "End Of Line (Test Fin de Ligne)", desc: "Banc de contrôle final automatisé (électrique sur ligne JIT, fonctionnel sur ligne mécanismes) validant à 100% le produit avant impression de l'étiquette de traçabilité." },
+  { term: "4D LWM", full: "Laser Welding Monitor (Surveillance Soudage Laser)", desc: "Système optique temps réel analysant les émissions plasma, thermiques et réfléchies du bain de fusion laser pour détecter instantanément un manque de pénétration ou un jeu excessif." },
+  { term: "PFO", full: "Programmable Focusing Optic", desc: "Tête scanner optique programmable permettant de déplacer le faisceau laser à très haute vitesse (soudage à la volée) avec trajectoires complexes." },
+  { term: "TCP", full: "Tool Center Point", desc: "Point de référence géométrique de l'extrémité de l'outil robot (torche MIG/MAG ou tête laser) dont la précision doit être vérifiée périodiquement." },
+  { term: "STA", full: "Supplier Technical Assistance", desc: "Ingénieur Qualité Fournisseurs chargé d'auditer et de valider la maîtrise des caractéristiques S/R chez les fournisseurs et sous-traitants." },
+  { term: "CQI-9", full: "Continuous Quality Improvement - Heat Treat", desc: "Référentiel automobile AIAG d'évaluation annuelle des procédés de traitement thermique (pyrométrie, TUS, SAT, atmosphères)." }
+];
+
+// ============================================================================
+// ÉTAT DE L'APPLICATION & PERSISTANCE LOCALSTORAGE
+// ============================================================================
+let state = {
+  activeTab: 'home',
+  selectedProcessId: null,
+  showEnglish: false,
+  homeSearchQuery: '',
+  bpFilterProcess: 'ALL',
+  bpFilterTheme: 'ALL',
+  glossarySearch: '',
+  ratings: {} // { "1.2": "OK" | "NOK" | "ND" | "NA" }
+};
+
+try {
+  const savedRatings = localStorage.getItem('forvia_sr_ratings_v4');
+  if (savedRatings) state.ratings = JSON.parse(savedRatings);
+  const savedEn = localStorage.getItem('forvia_sr_show_en');
+  if (savedEn) state.showEnglish = JSON.parse(savedEn);
+} catch (e) {
+  console.warn("Storage unavailable", e);
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('forvia_sr_ratings_v4', JSON.stringify(state.ratings));
+    localStorage.setItem('forvia_sr_show_en', JSON.stringify(state.showEnglish));
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('opacity-0');
+  t.classList.add('opacity-100');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    t.classList.remove('opacity-100');
+    t.classList.add('opacity-0');
+  }, 2200);
+}
+
+// ============================================================================
+// CALCULS & STATISTIQUES GLOBALES
+// ============================================================================
+function getGlobalStats() {
+  let totalCriteria = 0;
+  let totalBP = 0;
+  let countOK = 0;
+  let countNOK = 0;
+  let countND = 0;
+  let countNA = 0;
+  let bpNOKList = [];
+
+  AUDIT_DATABASE.forEach(proc => {
+    proc.criteria.forEach(c => {
+      totalCriteria++;
+      if (c.bp) totalBP++;
+      const r = state.ratings[c.id];
+      if (r === 'OK') countOK++;
+      else if (r === 'NOK') {
+        countNOK++;
+        if (c.bp) bpNOKList.push({ ...c, procName: proc.name, procCode: proc.code });
+      }
+      else if (r === 'ND') countND++;
+      else if (r === 'NA') countNA++;
+    });
+  });
+
+  const evaluated = countOK + countNOK + countND + countNA;
+  const applicableEvaluated = (countOK + countNOK + countND);
+  // Formule : (Nb OK + 0.5 * Nb ND) / (Nb évalués applicables)
+  const complianceScore = applicableEvaluated > 0
+    ? ((countOK + 0.5 * countND) / applicableEvaluated) * 100
+    : null;
+
+  return {
+    totalProcesses: AUDIT_DATABASE.length,
+    totalCriteria,
+    totalBP,
+    countOK,
+    countNOK,
+    countND,
+    countNA,
+    evaluated,
+    applicableEvaluated,
+    complianceScore,
+    bpNOKList
+  };
+}
+
+function getProcessStats(proc) {
+  let bpCount = 0;
+  let ok = 0, nok = 0, nd = 0, na = 0;
+  proc.criteria.forEach(c => {
+    if (c.bp) bpCount++;
+    const r = state.ratings[c.id];
+    if (r === 'OK') ok++;
+    else if (r === 'NOK') nok++;
+    else if (r === 'ND') nd++;
+    else if (r === 'NA') na++;
+  });
+  return { total: proc.criteria.length, bpCount, ok, nok, nd, na };
+}
+
+// ============================================================================
+// ACTIONS UTILISATEUR
+// ============================================================================
+function switchTab(tabName) {
+  state.activeTab = tabName;
+  if (tabName !== 'processes') {
+    state.selectedProcessId = null;
+  }
+  updateNavUI();
+  renderCurrentView();
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function updateNavUI() {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const isTarget = btn.getAttribute('data-tab') === state.activeTab;
+    if (isTarget) {
+      btn.classList.remove('text-slate-500');
+      btn.classList.add('text-forvia-cyan', 'bg-sky-50');
+    } else {
+      btn.classList.add('text-slate-500');
+      btn.classList.remove('text-forvia-cyan', 'bg-sky-50');
+    }
+  });
+}
+
+function toggleEnglishGlobal() {
+  state.showEnglish = !state.showEnglish;
+  saveState();
+  updateLangButtonUI();
+  renderCurrentView();
+  showToast(state.showEnglish ? "Texte anglais original affiché" : "Texte anglais original masqué");
+}
+
+function updateLangButtonUI() {
+  const dot = document.getElementById('en-status-dot');
+  const btn = document.getElementById('btn-lang-toggle');
+  if (state.showEnglish) {
+    dot.classList.remove('bg-slate-400');
+    dot.classList.add('bg-emerald-400');
+    btn.classList.add('bg-white/25', 'border-sky-300');
+  } else {
+    dot.classList.add('bg-slate-400');
+    dot.classList.remove('bg-emerald-400');
+    btn.classList.remove('bg-white/25', 'border-sky-300');
+  }
+}
+
+function openProcessDetail(procId) {
+  state.activeTab = 'processes';
+  state.selectedProcessId = procId;
+  updateNavUI();
+  renderCurrentView();
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function closeProcessDetail() {
+  state.selectedProcessId = null;
+  renderCurrentView();
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function setCriterionRating(critId, value) {
+  if (state.ratings[critId] === value) {
+    delete state.ratings[critId];
+  } else {
+    state.ratings[critId] = value;
+  }
+  saveState();
+  // Re-render lightweight or current view
+  renderCurrentView(true);
+}
+
+function resetAllRatings() {
+  state.ratings = {};
+  saveState();
+  renderCurrentView();
+  showToast("Auto-évaluation réinitialisée");
+}
+
+// ============================================================================
+// COMPOSANT CARTE CRITÈRE RÉUTILISABLE
+// ============================================================================
+function renderCriterionCard(c, procInfo = null) {
+  const rating = state.ratings[c.id] || null;
+  const isBP = c.bp;
+
+  let cardBorder = "border-slate-200";
+  if (rating === 'NOK' && isBP) cardBorder = "border-red-500 ring-2 ring-red-500/20";
+  else if (rating === 'NOK') cardBorder = "border-red-400";
+  else if (rating === 'OK') cardBorder = "border-emerald-400";
+
+  return `
+    <div class="bg-white rounded-2xl p-3.5 shadow-sm border ${cardBorder} transition-all">
+      <div class="flex items-start justify-between gap-2 mb-1.5">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-forvia-blue border border-slate-200">
+            #${c.id}
+          </span>
+          ${procInfo ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-sky-50 text-forvia-cyan border border-sky-200">${procInfo}</span>` : ''}
+          <span class="text-[10px] font-medium text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+            ${c.theme}
+          </span>
+        </div>
+        ${isBP ? `
+          <span class="shrink-0 inline-flex items-center gap-1 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-lg shadow-sm">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+            BLOQUANT
+          </span>
+        ` : ''}
+      </div>
+
+      <p class="text-[13px] leading-relaxed text-slate-800 font-medium mt-1">
+        ${c.fr}
+      </p>
+
+      ${state.showEnglish ? `
+        <p class="text-[11px] leading-snug text-slate-500 italic mt-2 pt-2 border-t border-dashed border-slate-200">
+          <span class="font-semibold not-italic text-slate-400">EN:</span> ${c.en}
+        </p>
+      ` : ''}
+
+      <!-- Interactive Self-Audit Rating Buttons -->
+      <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Évaluation :</span>
+        <div class="flex items-center gap-1">
+          <button onclick="setCriterionRating('${c.id}', 'OK')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'OK' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'}">OK</button>
+          <button onclick="setCriterionRating('${c.id}', 'NOK')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'NOK' ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-700'}">NOK</button>
+          <button onclick="setCriterionRating('${c.id}', 'ND')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'ND' ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'}">ND</button>
+          <button onclick="setCriterionRating('${c.id}', 'NA')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'NA' ? 'bg-slate-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">NA</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================================
+// VUE 1 : ACCUEIL (RÉFÉRENTIEL, KPI, RECHERCHE GLOBALE, RÈGLES)
+// ============================================================================
+function renderHomeView() {
+  const stats = getGlobalStats();
+  const q = state.homeSearchQuery.trim().toLowerCase();
+
+  let searchResultsHTML = '';
+  if (q.length >= 2) {
+    const matches = [];
+    AUDIT_DATABASE.forEach(proc => {
+      proc.criteria.forEach(c => {
+        if (
+          c.fr.toLowerCase().includes(q) ||
+          c.en.toLowerCase().includes(q) ||
+          c.theme.toLowerCase().includes(q) ||
+          c.id.toLowerCase().includes(q) ||
+          proc.name.toLowerCase().includes(q)
+        ) {
+          matches.push({ c, procName: `${proc.code} • ${proc.name}` });
+        }
+      });
+    });
+
+    searchResultsHTML = `
+      <div class="mt-3 space-y-2.5 animate-fade">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-forvia-blue">${matches.length} résultat(s) trouvé(s)</span>
+          <button onclick="clearHomeSearch()" class="text-xs text-forvia-cyan font-semibold">Effacer</button>
+        </div>
+        ${matches.length === 0 ? `
+          <div class="bg-white rounded-2xl p-6 text-center border border-slate-200">
+            <p class="text-sm text-slate-500">Aucun critère ne correspond à « <strong>${state.homeSearchQuery}</strong> ».</p>
+          </div>
+        ` : matches.map(m => renderCriterionCard(m.c, m.procName)).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="p-4 space-y-4 animate-fade">
+      <!-- Global Instant Search Bar -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="home-search-input"
+          value="${state.homeSearchQuery.replace(/"/g, '&quot;')}"
+          oninput="handleHomeSearch(this.value)"
+          placeholder="Rechercher (ex: Poka Yoke, OK1P, Euchner, 8D, laser...)"
+          class="w-full bg-white border border-slate-200 focus:border-forvia-cyan focus:ring-2 focus:ring-sky-500/20 rounded-2xl pl-10 pr-9 py-3 text-xs font-medium text-slate-800 shadow-sm outline-none transition"
+        />
+        ${state.homeSearchQuery ? `
+          <button onclick="clearHomeSearch()" class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        ` : ''}
+      </div>
+
+      <!-- Quick Search Tags -->
+      ${!q ? `
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          <span class="text-[10px] font-semibold text-slate-400 shrink-0">Accès rapide :</span>
+          ${['Poka-Yoke', 'OK 1ère pièce', 'Euchner', '8D', 'dérogation', 'CQI-9', 'macrographie'].map(tag => `
+            <button onclick="handleHomeSearch('${tag}')" class="shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-forvia-cyan hover:text-forvia-cyan transition">
+              ${tag}
+            </button>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      ${searchResultsHTML}
+
+      ${!q ? `
+        <!-- KPI Cards Row -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <button onclick="switchTab('processes')" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm text-left hover:border-forvia-cyan transition active:scale-95">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Processus</div>
+            <div class="text-2xl font-extrabold text-forvia-blue mt-0.5">${stats.totalProcesses}</div>
+            <div class="text-[10px] text-forvia-cyan font-semibold mt-0.5">Chapitres →</div>
+          </button>
+
+          <button onclick="switchTab('processes')" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm text-left hover:border-forvia-cyan transition active:scale-95">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Critères</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-0.5">${stats.totalCriteria}</div>
+            <div class="text-[10px] text-slate-500 font-medium mt-0.5">Grille complète</div>
+          </button>
+
+          <button onclick="switchTab('bp')" class="bg-red-50 rounded-2xl p-3 border border-red-200 shadow-sm text-left hover:border-red-400 transition active:scale-95">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-red-600">Bloquants</div>
+            <div class="text-2xl font-extrabold text-red-600 mt-0.5">${stats.totalBP}</div>
+            <div class="text-[10px] text-red-700 font-semibold mt-0.5">Points BP →</div>
+          </button>
+        </div>
+
+        <!-- Document Identity Card -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-forvia-cyan">Fiche d'identité du référentiel</span>
+              <h2 class="text-sm font-bold text-forvia-navy">Audit Sécurité et Réglementation FAS</h2>
+            </div>
+            <span class="font-mono text-xs font-bold bg-forvia-blue text-white px-2.5 py-1 rounded-xl">04/25</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-xl">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Référence</div>
+              <div class="font-mono font-bold text-slate-800 mt-0.5">FST-F-LSE-3925</div>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Version</div>
+              <div class="font-bold text-slate-800 mt-0.5">Issue n°4 (Avril 2025)</div>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Auteur</div>
+              <div class="font-semibold text-slate-800 mt-0.5">Joaquim Fuentes</div>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Propriétaire</div>
+              <div class="font-semibold text-slate-800 mt-0.5">Daniel Humbert-Droz</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-2.5 rounded-xl text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-semibold uppercase">Approuvé par</span>
+              <span class="font-bold text-forvia-blue">Luckasz Babuska</span>
+            </div>
+          </div>
+
+          <div class="bg-sky-50/70 border border-sky-100 p-3 rounded-xl">
+            <div class="text-[10px] font-bold uppercase text-forvia-cyan mb-1">Périmètre d'application</div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              Toutes les entités <strong>Forvia Automotive Seating (FAS)</strong>, y compris les sous-traitants et fournisseurs livrant des produits finis sous le nom <strong>Faurecia / Forvia</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scoring Rules & Formula Card -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+          <h3 class="text-sm font-bold text-forvia-navy flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-forvia-blue text-white flex items-center justify-center text-xs font-bold">%</span>
+            Règles de Notation & Indice de Conformité
+          </h3>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+              <div class="font-extrabold text-emerald-700">OK (Coeff. 1,0)</div>
+              <div class="text-[11px] text-emerald-800 mt-0.5">Niveau attendu atteint et maîtrisé sur le terrain.</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-red-50 border border-red-200">
+              <div class="font-extrabold text-red-700">NOK (Coeff. 0)</div>
+              <div class="text-[11px] text-red-800 mt-0.5">Écart constaté. Bloque la note si Point Bloquant (BP).</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200">
+              <div class="font-extrabold text-amber-700">ND (Coeff. 0,5)</div>
+              <div class="text-[11px] text-amber-800 mt-0.5">Non Audité / Non Démontré (process à l'arrêt).</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200">
+              <div class="font-extrabold text-slate-700">NA (Exclu)</div>
+              <div class="text-[11px] text-slate-600 mt-0.5">Non Applicable au périmètre audité.</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 text-slate-100 p-3 rounded-xl">
+            <div class="text-[10px] uppercase tracking-wider text-sky-400 font-bold mb-1">Formule de calcul de l'Indice</div>
+            <div class="font-mono text-[11px] text-white bg-white/10 p-2 rounded-lg text-center">
+              (Nb OK + 0,5 × Nb ND) / (Total Critères − Nb NA)
+            </div>
+            <p class="text-[11px] text-slate-300 mt-2 leading-relaxed">
+              <strong class="text-red-400">Impact Point Bloquant (BP) :</strong> Un seul critère BP évalué <strong>NOK</strong> entraîne automatiquement la non-conformité de l'audit (blocage de la note) et exige un confinement immédiat.
+            </p>
+          </div>
+        </div>
+
+        <!-- Associated Documents -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+          <h3 class="text-sm font-bold text-forvia-navy">Documents Associés de Référence</h3>
+          <div class="space-y-2">
+            ${[
+              { code: 'FAU-P-LSC-3900', title: 'Réaliser des audits internes' },
+              { code: 'FAU-P-LSC-7000', title: 'Alerte sur situations sensibles' },
+              { code: 'FAU-P-LSC-5600', title: 'Conservation des enregistrements' },
+              { code: 'FAU-C-DSG-3530', title: '20 règles obligatoires S/R' },
+              { code: 'FAU-F-DSG-0002', title: 'Demande de dérogation S/R' }
+            ].map(doc => `
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-xs font-medium text-slate-700">${doc.title}</span>
+                <span class="font-mono text-[11px] font-bold text-forvia-blue bg-white px-2 py-0.5 rounded-lg border border-slate-200 shrink-0 ml-2">${doc.code}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Revision History -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+          <h3 class="text-sm font-bold text-forvia-navy">Historique des Révisions</h3>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-200">
+              <div class="flex justify-between font-bold text-forvia-blue">
+                <span>Issue n°4 — 04/2025</span>
+                <span class="text-[10px] uppercase bg-forvia-cyan text-white px-1.5 py-0.5 rounded">Actuelle</span>
+              </div>
+              <p class="text-slate-600 mt-1">Mise à jour complète des 22 processus (350 critères, 79 Points Bloquants), renforcement surveillance soudage laser (4D LWM), couture airbag et ligne JIT.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
+              <div class="font-bold text-slate-700">Issue n°3 — 2023</div>
+              <p class="mt-0.5">Intégration des exigences LockBolt, formage d'extrémité et harmonisation Forvia.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
+              <div class="font-bold text-slate-700">Issue n°2 — 2021</div>
+              <p class="mt-0.5">Ajout des règles de notation ND (coefficient 0,5) et identification des Points Bloquants.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
+              <div class="font-bold text-slate-700">Issue n°1 — Création</div>
+              <p class="mt-0.5">Création initiale de la grille d'audit Sécurité & Réglementation FAS.</p>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function handleHomeSearch(val) {
+  state.homeSearchQuery = val;
+  renderCurrentView(true);
+  const input = document.getElementById('home-search-input');
+  if (input) {
+    input.focus();
+    input.setSelectionRange(val.length, val.length);
+  }
+}
+
+function clearHomeSearch() {
+  state.homeSearchQuery = '';
+  renderCurrentView();
+}
+
+// ============================================================================
+// VUE 2 : PROCESSUS (LISTE DES 22 CHAPITRES & DÉTAIL D'UN PROCESSUS)
+// ============================================================================
+function renderProcessesView() {
+  if (state.selectedProcessId !== null) {
+    return renderSingleProcessDetail(state.selectedProcessId);
+  }
+
+  return `
+    <div class="p-4 space-y-3 animate-fade">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-extrabold text-forvia-navy">Les 22 Processus d'Audit</h2>
+          <p class="text-xs text-slate-500">Sélectionnez un chapitre pour consulter ses critères</p>
+        </div>
+        <span class="text-xs font-bold bg-forvia-blue text-white px-2.5 py-1 rounded-xl">350 crit.</span>
+      </div>
+
+      <div class="space-y-2.5">
+        ${AUDIT_DATABASE.map(proc => {
+          const pStats = getProcessStats(proc);
+          const evaluatedCount = pStats.ok + pStats.nok + pStats.nd + pStats.na;
+          return `
+            <button onclick="openProcessDetail(${proc.id})" class="w-full bg-white hover:bg-slate-50 active:scale-[0.99] transition rounded-2xl p-3.5 border border-slate-200 shadow-sm text-left flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0 border border-slate-200">
+                  ${proc.icon}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] font-bold text-forvia-cyan">${proc.code}</span>
+                    ${evaluatedCount > 0 ? `
+                      <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700">
+                        ${evaluatedCount}/${pStats.total} évalués
+                      </span>
+                    ` : ''}
+                  </div>
+                  <h3 class="text-[13px] font-bold text-slate-900 truncate">${proc.name}</h3>
+                  <p class="text-[11px] text-slate-400 truncate">${proc.enName}</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg">
+                  ${pStats.total} Q
+                </span>
+                <span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg">
+                  ${pStats.bpCount} BP
+                </span>
+              </div>
+            </button>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSingleProcessDetail(procId) {
+  const proc = AUDIT_DATABASE.find(p => p.id === procId);
+  if (!proc) return '';
+  const pStats = getProcessStats(proc);
+
+  return `
+    <div class="animate-fade">
+      <!-- Sticky Subheader -->
+      <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
+        <div class="flex items-center justify-between gap-2">
+          <button onclick="closeProcessDetail()" class="inline-flex items-center gap-1 text-xs font-bold text-forvia-cyan hover:text-forvia-blue py-1 pr-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+            22 Processus
+          </button>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg">${pStats.total} critères</span>
+            <span class="text-[11px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-lg">${pStats.bpCount} BP</span>
+          </div>
+        </div>
+        <h2 class="text-sm font-extrabold text-forvia-navy mt-1">${proc.code} — ${proc.name}</h2>
+        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${proc.description}</p>
+      </div>
+
+      <!-- Criteria List -->
+      <div class="p-4 space-y-3">
+        ${proc.criteria.map(c => renderCriterionCard(c)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================================
+// VUE 3 : POINTS BLOQUANTS (FOCUS CRITIQUE — LES 79 BP)
+// ============================================================================
+function renderBlockingPointsView() {
+  // Collect all 79 BP
+  const allBP = [];
+  AUDIT_DATABASE.forEach(proc => {
+    proc.criteria.forEach(c => {
+      if (c.bp) {
+        allBP.push({ ...c, procId: proc.id, procCode: proc.code, procName: proc.name });
+      }
+    });
+  });
+
+  // Theme classification helper
+  function getBPThemeCategory(c) {
+    const text = (c.theme + ' ' + c.fr).toLowerCase();
+    if (text.includes('verrouill') || text.includes('paramètre') || text.includes('recette')) return 'Paramètres verrouillés';
+    if (text.includes('ok 1ère') || text.includes('ok1p') || text.includes('requalification')) return 'OK 1ère Pièce & Requalif';
+    if (text.includes('courbe') || text.includes('surveillance') || text.includes('poka-yoke') || text.includes('détection') || text.includes('eol') || text.includes('pyromètre') || text.includes('lwm')) return 'Détection & Surveillance 100%';
+    if (text.includes('reprise') || text.includes('rebut') || text.includes('blocage') || text.includes('éjection') || text.includes('dérogation')) return 'Blocage, Reprise & Rebuts';
+    return 'Traçabilité, Labo & Matière';
+  }
+
+  const filteredBP = allBP.filter(item => {
+    const matchProc = state.bpFilterProcess === 'ALL' || String(item.procId) === String(state.bpFilterProcess);
+    const matchTheme = state.bpFilterTheme === 'ALL' || getBPThemeCategory(item) === state.bpFilterTheme;
+    return matchProc && matchTheme;
+  });
+
+  const themes = [
+    'ALL',
+    'Paramètres verrouillés',
+    'Détection & Surveillance 100%',
+    'OK 1ère Pièce & Requalif',
+    'Blocage, Reprise & Rebuts',
+    'Traçabilité, Labo & Matière'
+  ];
+
+  return `
+    <div class="p-4 space-y-3.5 animate-fade">
+      <!-- Warning Banner -->
+      <div class="bg-gradient-to-br from-red-600 to-red-700 text-white rounded-2xl p-4 shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-lg">Tolérance Zéro S/R</span>
+          <span class="font-mono text-sm font-extrabold">${allBP.length} Points Bloquants</span>
+        </div>
+        <h2 class="text-base font-extrabold mt-1.5">Critères Bloquants (BP)</h2>
+        <p class="text-xs text-red-100 mt-1 leading-relaxed">
+          Tout écart (<strong>NOK</strong>) sur l'un de ces 79 critères invalide immédiatement le résultat de l'audit S/R et impose un arrêt / confinement du flux.
+        </p>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm space-y-2.5">
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Filtrer par Processus</label>
+          <select onchange="setBPFilterProcess(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-forvia-cyan">
+            <option value="ALL" ${state.bpFilterProcess === 'ALL' ? 'selected' : ''}>Tous les processus (${allBP.length} BP)</option>
+            ${AUDIT_DATABASE.map(p => {
+              const cnt = p.criteria.filter(c => c.bp).length;
+              return `<option value="${p.id}" ${String(state.bpFilterProcess) === String(p.id) ? 'selected' : ''}>${p.code} — ${p.name} (${cnt} BP)</option>`;
+            }).join('')}
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Filtrer par Thématique</label>
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            ${themes.map(th => `
+              <button onclick="setBPFilterTheme('${th}')" class="shrink-0 text-[11px] font-semibold px-2.5 py-1.5 rounded-xl border transition ${state.bpFilterTheme === th ? 'bg-red-600 text-white border-red-600' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-red-300'}">
+                ${th === 'ALL' ? 'Tous les thèmes' : th}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-bold text-slate-700">${filteredBP.length} Point(s) Bloquant(s) affiché(s)</span>
+        ${(state.bpFilterProcess !== 'ALL' || state.bpFilterTheme !== 'ALL') ? `
+          <button onclick="resetBPFilters()" class="text-xs font-semibold text-forvia-cyan">Réinitialiser filtres</button>
+        ` : ''}
+      </div>
+
+      <!-- List of BP Cards -->
+      <div class="space-y-3">
+        ${filteredBP.map(item => renderCriterionCard(item, `${item.procCode} • ${item.procName}`)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function setBPFilterProcess(val) {
+  state.bpFilterProcess = val;
+  renderCurrentView();
+}
+
+function setBPFilterTheme(val) {
+  state.bpFilterTheme = val;
+  renderCurrentView();
+}
+
+function resetBPFilters() {
+  state.bpFilterProcess = 'ALL';
+  state.bpFilterTheme = 'ALL';
+  renderCurrentView();
+}
+
+// ============================================================================
+// VUE 4 : SIMULATEUR D'AUTO-AUDIT & GLOSSAIRE S/R
+// ============================================================================
+function renderSimulatorAndGlossaryView() {
+  const stats = getGlobalStats();
+  const hasBPBlocker = stats.bpNOKList.length > 0;
+  const scoreDisplay = stats.complianceScore !== null ? stats.complianceScore.toFixed(1) + '%' : '—';
+
+  let statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600">Aucune évaluation</span>`;
+  if (stats.applicableEvaluated > 0) {
+    if (hasBPBlocker) {
+      statusBadge = `<span class="text-xs font-extrabold px-2.5 py-1 rounded-xl bg-red-600 text-white">AUDIT BLOQUÉ (BP NOK)</span>`;
+    } else if (stats.complianceScore >= 90) {
+      statusBadge = `<span class="text-xs font-extrabold px-2.5 py-1 rounded-xl bg-emerald-600 text-white">CONFORME (≥ 90%)</span>`;
+    } else {
+      statusBadge = `<span class="text-xs font-extrabold px-2.5 py-1 rounded-xl bg-amber-500 text-white">PLAN D'ACTION REQUIS</span>`;
+    }
+  }
+
+  const gq = state.glossarySearch.trim().toLowerCase();
+  const filteredGlossary = GLOSSARY_TERMS.filter(g =>
+    !gq || g.term.toLowerCase().includes(gq) || g.full.toLowerCase().includes(gq) || g.desc.toLowerCase().includes(gq)
+  );
+
+  // Process breakdown for evaluated items
+  const evaluatedProcesses = AUDIT_DATABASE.map(proc => {
+    const ps = getProcessStats(proc);
+    const app = ps.ok + ps.nok + ps.nd;
+    const pct = app > 0 ? ((ps.ok + 0.5 * ps.nd) / app) * 100 : null;
+    return { proc, ps, app, pct };
+  }).filter(x => x.ps.ok + x.ps.nok + x.ps.nd + x.ps.na > 0);
+
+  return `
+    <div class="p-4 space-y-4 animate-fade">
+      <!-- Real-Time Self-Audit Simulator Card -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-forvia-cyan">Simulation Terrain</span>
+            <h2 class="text-base font-extrabold text-forvia-navy">Simulateur d'Auto-Audit</h2>
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div class="bg-slate-900 text-white rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">Indice de Conformité Calculé</div>
+            <div class="text-3xl font-extrabold mt-0.5 ${hasBPBlocker ? 'text-red-400' : 'text-sky-400'}">
+              ${scoreDisplay}
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">
+              ${stats.evaluated} / ${stats.totalCriteria} critères évalués
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-1.5 text-center text-xs">
+            <div class="bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1.5 rounded-xl">
+              <div class="font-extrabold text-emerald-400">${stats.countOK}</div>
+              <div class="text-[9px] text-emerald-200">OK</div>
+            </div>
+            <div class="bg-red-500/20 border border-red-500/30 px-2.5 py-1.5 rounded-xl">
+              <div class="font-extrabold text-red-400">${stats.countNOK}</div>
+              <div class="text-[9px] text-red-200">NOK</div>
+            </div>
+            <div class="bg-amber-500/20 border border-amber-500/30 px-2.5 py-1.5 rounded-xl">
+              <div class="font-extrabold text-amber-400">${stats.countND}</div>
+              <div class="text-[9px] text-amber-200">ND (0,5)</div>
+            </div>
+            <div class="bg-slate-500/20 border border-slate-500/30 px-2.5 py-1.5 rounded-xl">
+              <div class="font-extrabold text-slate-300">${stats.countNA}</div>
+              <div class="text-[9px] text-slate-300">NA</div>
+            </div>
+          </div>
+        </div>
+
+        ${hasBPBlocker ? `
+          <div class="bg-red-50 border border-red-300 rounded-xl p-3">
+            <div class="text-xs font-extrabold text-red-700 flex items-center gap-1.5">
+              <span>⚠️ Alerte : ${stats.bpNOKList.length} Point(s) Bloquant(s) NOK détecté(s) !</span>
+            </div>
+            <ul class="mt-1.5 space-y-1 text-[11px] text-red-800">
+              ${stats.bpNOKList.map(bp => `
+                <li>• <strong>#${bp.id} (${bp.procCode})</strong> : ${bp.theme}</li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${evaluatedProcesses.length > 0 ? `
+          <div class="space-y-1.5 pt-1">
+            <div class="text-[11px] font-bold text-slate-600">Détail par processus évalué :</div>
+            ${evaluatedProcesses.map(({ proc, ps, pct }) => `
+              <div onclick="openProcessDetail(${proc.id})" class="cursor-pointer flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs">
+                <span class="font-semibold text-slate-800 truncate pr-2">${proc.code} • ${proc.name}</span>
+                <span class="font-mono font-bold shrink-0 ${pct !== null && pct < 90 ? 'text-amber-600' : 'text-emerald-600'}">
+                  ${pct !== null ? pct.toFixed(0) + '%' : 'NA'} (${ps.ok} OK / ${ps.nok} NOK)
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <p class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            💡 Cochez <strong>OK, NOK, ND ou NA</strong> sur n'importe quel critère dans les onglets <em>Processus</em> ou <em>Bloquants</em> pour simuler votre score d'audit en temps réel.
+          </p>
+        `}
+
+        ${stats.evaluated > 0 ? `
+          <button onclick="resetAllRatings()" class="w-full py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+            Réinitialiser l'auto-évaluation
+          </button>
+        ` : ''}
+      </div>
+
+      <!-- Glossary Section -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-forvia-cyan">Terminologie Technique</span>
+          <h3 class="text-base font-extrabold text-forvia-navy">Glossaire des Acronymes S/R</h3>
+        </div>
+
+        <input
+          type="text"
+          value="${state.glossarySearch.replace(/"/g, '&quot;')}"
+          oninput="handleGlossarySearch(this.value)"
+          placeholder="Filtrer un acronyme (ex: OK1P, KPC, CCPU, 4D LWM...)"
+          class="w-full bg-slate-50 border border-slate-200 focus:border-forvia-cyan rounded-xl px-3.5 py-2.5 text-xs font-medium outline-none"
+        />
+
+        <div class="space-y-2.5">
+          ${filteredGlossary.map(item => `
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-mono text-xs font-extrabold text-white bg-forvia-blue px-2 py-0.5 rounded-lg">${item.term}</span>
+                <span class="text-[11px] font-bold text-forvia-cyan text-right">${item.full}</span>
+              </div>
+              <p class="text-xs text-slate-700 mt-1.5 leading-relaxed">${item.desc}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function handleGlossarySearch(val) {
+  state.glossarySearch = val;
+  renderCurrentView(true);
+}
+
+// ============================================================================
+// RENDU PRINCIPAL
+// ============================================================================
+function renderCurrentView(preserveScroll = false) {
+  const container = document.getElementById('main-content');
+  const scrollPos = container.scrollTop;
+
+  let html = '';
+  if (state.activeTab === 'home') html = renderHomeView();
+  else if (state.activeTab === 'processes') html = renderProcessesView();
+  else if (state.activeTab === 'bp') html = renderBlockingPointsView();
+  else if (state.activeTab === 'simulator') html = renderSimulatorAndGlossaryView();
+
+  container.innerHTML = html;
+  if (preserveScroll) {
+    container.scrollTop = scrollPos;
+  }
+}
+
+window.onload = function() {
+  updateLangButtonUI();
+  updateNavUI();
+  renderCurrentView();
+};
+</script>
+</body>
+</html>
