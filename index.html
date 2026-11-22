@@ -2,7 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Audit S/R" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23002B49'/%3E%3Ctext x='90' y='115' font-size='80' text-anchor='middle' fill='%2338BDF8' font-family='Arial' font-weight='bold'%3ES/R%3C/text%3E%3C/svg%3E" />
   <title>Guide Audit S/R — FORVIA Automotive Seating</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,11 +39,43 @@
     }
   </script>
   <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    html, body {
+      height: 100%;
+      overscroll-behavior: none;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
     body {
       background-color: #E2E8F0;
       font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
     }
+    button, nav, header { -webkit-user-select: none; user-select: none; }
+    /* Plein écran sur téléphone : zones sûres (encoche / barre d'accueil) */
+    @media (max-width: 639px) {
+      body { background-color: #F8FAFC; display: block; }
+      #app-shell { width: 100vw; height: 100vh; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
+      #app-header { padding-top: calc(var(--sat) + 0.75rem); padding-left: calc(var(--sal) + 1rem); padding-right: calc(var(--sar) + 1rem); }
+      #app-nav { padding-bottom: calc(var(--sab) + 0.375rem); padding-left: calc(var(--sal) + 0.5rem); padding-right: calc(var(--sar) + 0.5rem); }
+      #main-content { padding-left: var(--sal); padding-right: var(--sar); }
+    }
+    /* Anti-zoom iOS : champs à 16px minimum */
+    input, select, textarea { font-size: 16px !important; }
+    /* Cibles tactiles >= 44px */
+    .nav-btn { min-height: 52px; }
+    .rate-btn { min-width: 48px; min-height: 40px; }
+    .touch-target { min-height: 44px; }
+    button:active { transform: scale(0.97); }
+    #main-content { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
     /* Custom scrollbar for mobile frame */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -64,13 +103,13 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center sm:p-4 text-slate-800">
+<body class="min-h-screen sm:flex items-center justify-center sm:p-4 text-slate-800">
 
   <!-- Mobile App Container -->
   <div id="app-shell" class="w-full sm:w-[440px] h-[100dvh] sm:h-[860px] bg-forvia-light sm:rounded-[34px] sm:shadow-2xl sm:border-[6px] sm:border-slate-900 flex flex-col overflow-hidden relative">
 
     <!-- Top App Header -->
-    <header class="bg-gradient-to-r from-forvia-navy via-forvia-blue to-[#003B64] text-white px-4 pt-3 pb-3.5 shadow-md shrink-0 z-20">
+    <header id="app-header" class="bg-gradient-to-r from-forvia-navy via-forvia-blue to-[#003B64] text-white px-4 pt-3 pb-3.5 shadow-md shrink-0 z-20">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -86,7 +125,7 @@
             <h1 class="text-sm font-bold tracking-tight text-white mt-0.5 leading-tight">Guide Audit S/R — FORVIA</h1>
           </div>
         </div>
-        <button onclick="toggleEnglishGlobal()" id="btn-lang-toggle" title="Afficher/Masquer l'anglais original" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-[11px] font-semibold flex items-center gap-1 border border-white/15">
+        <button onclick="toggleEnglishGlobal()" id="btn-lang-toggle" title="Afficher/Masquer l'anglais original" class="touch-target px-3 py-1.5 rounded-xl bg-white/10 active:bg-white/25 transition text-xs font-semibold flex items-center gap-1.5 border border-white/15">
           <span>EN</span>
           <span id="en-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
         </button>
@@ -94,45 +133,45 @@
     </header>
 
     <!-- Main Scrollable Viewport -->
-    <main id="main-content" class="flex-1 overflow-y-auto custom-scroll pb-24">
+    <main id="main-content" class="flex-1 overflow-y-auto custom-scroll pb-6">
       <!-- Dynamic views injected here -->
     </main>
 
     <!-- Bottom Navigation Bar (4 Tabs) -->
-    <nav class="bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+    <nav id="app-nav" class="bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
       <button onclick="switchTab('home')" data-tab="home" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-forvia-cyan">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
         </svg>
-        <span class="text-[10px] font-semibold">Accueil</span>
+        <span class="text-[11px] font-semibold">Accueil</span>
       </button>
 
       <button onclick="switchTab('processes')" data-tab="processes" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
         </svg>
-        <span class="text-[10px] font-semibold">Processus (22)</span>
+        <span class="text-[11px] font-semibold">Processus</span>
       </button>
 
       <button onclick="switchTab('bp')" data-tab="bp" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500 relative">
         <span class="absolute top-1 right-3 bg-forvia-danger text-white text-[9px] font-bold px-1.5 rounded-full leading-4">79</span>
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
         </svg>
-        <span class="text-[10px] font-semibold">Bloquants</span>
+        <span class="text-[11px] font-semibold">Bloquants</span>
       </button>
 
       <button onclick="switchTab('simulator')" data-tab="simulator" class="nav-btn flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition text-slate-500">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/>
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/>
         </svg>
-        <span class="text-[10px] font-semibold">Audit & Glossaire</span>
+        <span class="text-[11px] font-semibold">Audit</span>
       </button>
     </nav>
 
     <!-- Toast Notification Banner -->
-    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 whitespace-nowrap">
+    <div id="toast" style="bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));" class="fixed left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 whitespace-nowrap">
       Notification
     </div>
   </div>
@@ -893,12 +932,14 @@ function updateLangButtonUI() {
 function openProcessDetail(procId) {
   state.activeTab = 'processes';
   state.selectedProcessId = procId;
+  try { history.pushState({ detail: procId }, ''); } catch (e) {}
   updateNavUI();
   renderCurrentView();
   document.getElementById('main-content').scrollTop = 0;
 }
 
-function closeProcessDetail() {
+function closeProcessDetail(fromPop) {
+  if (!fromPop) { try { if (history.state && history.state.detail) { history.back(); return; } } catch (e) {} }
   state.selectedProcessId = null;
   renderCurrentView();
   document.getElementById('main-content').scrollTop = 0;
@@ -911,6 +952,7 @@ function setCriterionRating(critId, value) {
     state.ratings[critId] = value;
   }
   saveState();
+  try { if (navigator.vibrate) navigator.vibrate(value === 'NOK' ? [20, 40, 20] : 12); } catch (e) {}
   // Re-render lightweight or current view
   renderCurrentView(true);
 }
@@ -954,24 +996,24 @@ function renderCriterionCard(c, procInfo = null) {
         ` : ''}
       </div>
 
-      <p class="text-[13px] leading-relaxed text-slate-800 font-medium mt-1">
+      <p class="text-sm leading-relaxed text-slate-800 font-medium mt-1">
         ${c.fr}
       </p>
 
       ${state.showEnglish ? `
-        <p class="text-[11px] leading-snug text-slate-500 italic mt-2 pt-2 border-t border-dashed border-slate-200">
+        <p class="text-xs leading-snug text-slate-500 italic mt-2 pt-2 border-t border-dashed border-slate-200">
           <span class="font-semibold not-italic text-slate-400">EN:</span> ${c.en}
         </p>
       ` : ''}
 
       <!-- Interactive Self-Audit Rating Buttons -->
       <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
-        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Évaluation :</span>
-        <div class="flex items-center gap-1">
-          <button onclick="setCriterionRating('${c.id}', 'OK')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'OK' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'}">OK</button>
-          <button onclick="setCriterionRating('${c.id}', 'NOK')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'NOK' ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-700'}">NOK</button>
-          <button onclick="setCriterionRating('${c.id}', 'ND')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'ND' ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'}">ND</button>
-          <button onclick="setCriterionRating('${c.id}', 'NA')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition active:scale-95 ${rating === 'NA' ? 'bg-slate-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">NA</button>
+        <span class="hidden min-[380px]:inline text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Évaluation</span>
+        <div class="flex items-center gap-1.5">
+          <button onclick="setCriterionRating('${c.id}', 'OK')" class="rate-btn px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 ${rating === 'OK' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'}">OK</button>
+          <button onclick="setCriterionRating('${c.id}', 'NOK')" class="rate-btn px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 ${rating === 'NOK' ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-700'}">NOK</button>
+          <button onclick="setCriterionRating('${c.id}', 'ND')" class="rate-btn px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 ${rating === 'ND' ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'}">ND</button>
+          <button onclick="setCriterionRating('${c.id}', 'NA')" class="rate-btn px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 ${rating === 'NA' ? 'bg-slate-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">NA</button>
         </div>
       </div>
     </div>
@@ -1290,7 +1332,7 @@ function renderSingleProcessDetail(procId) {
       <!-- Sticky Subheader -->
       <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
         <div class="flex items-center justify-between gap-2">
-          <button onclick="closeProcessDetail()" class="inline-flex items-center gap-1 text-xs font-bold text-forvia-cyan hover:text-forvia-blue py-1 pr-2">
+          <button onclick="closeProcessDetail()" class="touch-target inline-flex items-center gap-1 text-sm font-bold text-forvia-cyan py-1 pr-3 -ml-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
             22 Processus
           </button>
@@ -1587,6 +1629,14 @@ function renderCurrentView(preserveScroll = false) {
     container.scrollTop = scrollPos;
   }
 }
+
+window.addEventListener('popstate', function() {
+  if (state.selectedProcessId !== null) closeProcessDetail(true);
+});
+
+['gesturestart', 'gesturechange'].forEach(function(ev) {
+  document.addEventListener(ev, function(e) { e.preventDefault(); });
+});
 
 window.onload = function() {
   updateLangButtonUI();
